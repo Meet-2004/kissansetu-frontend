@@ -1,6 +1,69 @@
 "use client";
+import {useState} from "react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { handleApi } from "../../lib/apiHndler";
+import { loginSuccess } from "../../Store/slices/authSlice";
+
 
 export default function LoginModal({ onClose }) {
+   const dispatch = useDispatch();
+   const [Error,setError]=useState(false);
+  const [formData,setformData]=useState({
+    email:"",
+    password:"",
+  })
+  let handleChange=(e)=>{
+    setformData({
+      ...formData,
+      [e.target.name]:e.target.value,
+    })
+  }
+  let handlesubmit=async(e)=>{
+    e.preventDefault();
+    console.log(formData)
+
+const result =await handleApi(() =>
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`,formData)
+    );
+
+ if (result.success) {
+      const user = result.data?.user;
+      const token = result.data?.token;
+
+      if (!user || !token) {
+        setError("Login failed: missing user data from server.");
+        return;
+      }
+
+
+      // Save token
+      localStorage.setItem("token", token);
+
+      // Save in Redux
+      dispatch(
+        loginSuccess({
+          user,
+          token,
+          role: user.role,
+        })
+      );
+
+      // Redirect
+      if (user.role === "FARMER") {
+        // router.push("/farmer/dashboard");
+        console.log("redirected to farmer dashboard");
+      } else {
+        // router.push("/buyer/dashboard");
+      }
+
+    } else {
+      setError(result.message);
+    }
+  }
+
+ 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
 
@@ -30,23 +93,27 @@ export default function LoginModal({ onClose }) {
         </p>
 
         {/* Form */}
+        <form onSubmit={handlesubmit}>
         <div className="mt-6 space-y-4">
 
           {/* Role Select */}
-          <div>
+          {/* <div>
             <label className="text-sm font-medium text-black">I am a</label>
             <select className="w-full mt-2 px-4 py-3 rounded-xl text-black  bg-gray-100 focus:outline-none focus:ring-2 border-2 border-gray-400 focus:ring-green-500">
                <option disabled selected>Choose Role</option> 
               <option>Farmer</option>
               <option>Buyer</option>
             </select>
-          </div>
-
+          </div> */}
+          
           {/* Email */}
           <div>
             <label className="text-sm font-medium  text-black">Email Address</label>
             <input
               type="email"
+               value={formData.email}
+               name="email"
+              onChange={handleChange}
               placeholder="your.email@example.com"
               className="w-full mt-2 px-4 py-3 rounded-xl text-black  bg-gray-100 border-2 border-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
@@ -57,6 +124,9 @@ export default function LoginModal({ onClose }) {
             <label className="text-sm font-medium  text-black">Password</label>
             <input
               type="password"
+              value={formData.password}
+              name="password"
+              onChange={handleChange}
               placeholder="Enter your password"
               className="w-full mt-2 px-4 py-3 text-black rounded-xl border-2 border-gray-400 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
@@ -74,7 +144,7 @@ export default function LoginModal({ onClose }) {
           </div>
 
           {/* Login Button */}
-          <button className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition">
+          <button className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition" onClick={handlesubmit}>
             Login
           </button>
 
@@ -100,6 +170,7 @@ export default function LoginModal({ onClose }) {
           </p>
 
         </div>
+        </form>
       </div>
     </div>
   );
