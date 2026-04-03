@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -20,7 +21,40 @@
 }
 
 body {
-  background: var(--background);
+  
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  
+}
+/* img, video {
+  max-width: unset;
+  height: unset;
+} */
+ 
+/* background black */
+.Back_color{
+    background-color: #64B900;
+}
+/* text black */
+.text_black{
+    color: black;
+}
+/* text lime */
+.text_lime{
+    color: #64B900;
+
+
+}
+/* text gray */
+.text_gray{
+  color:#00000099;
+}
+
+/* use in crop list form */
+.gradient{
+ background-color:#64B9000D;
+}
+
+/* Background Lime */
+.back_lime{
+  background-color: #64B900;
 }

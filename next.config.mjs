@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  reactCompiler: true,
+   reactStrictMode: false,
+  async rewrites() {
+    return [
+      { source: '/api/:path*', destination: 'http://192.168.2.186:8080/api/:path*' },
+    ];
+  },
 };
 
 export default nextConfig;
+
+
+
