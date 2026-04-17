@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  user: null,
+  user: "Your Name",
   // token: null,
   role: null,
   isAuthenticated: false,
   loading: false,
   error: null,
   id:null,
-  userMail:null,
+  userMail:"Your Email",
   fullName:null,
 
 };
@@ -33,7 +33,7 @@ reducers: {
       state.isAuthenticated = true;
       state.error = null;
       state.id=action.payload.id;
-      state.email=action.payload.userMail;
+      state.userMail=action.payload.userMail;
       state.fullName=action.payload.fullName;
     },
 

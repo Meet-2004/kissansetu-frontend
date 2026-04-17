@@ -19,8 +19,11 @@ export default function ReportBox({ onClose, reportCardDeta }) {
   };
 
   const handleSubmit = async () => {
+
+    const user=(reportCardDeta.user).toLowerCase().trim();
     const postReport = await postApi(
-      `/orderHistory/report/${reportCardDeta.orderId}`,
+      ` /report-${user}/${reportCardDeta.orderId}`,
+
    formData );
 
     if (postReport.success) {
@@ -86,8 +89,9 @@ export default function ReportBox({ onClose, reportCardDeta }) {
             value={formData.reason}
             onChange={handleChange}
             name="reason"
+           
           >
-            <option disabled>Select a reason</option>
+            <option disabled selected value="">Select a reason</option>
             <option>Poor product quality</option>
             <option>Late or no delivery</option>
             <option>Product not as described</option>

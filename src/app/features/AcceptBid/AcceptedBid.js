@@ -9,20 +9,23 @@ export default function AcceptedBid({
   onClose,
   buyerSelection,
   setrefreshKey,
+  refreshKey,
   
 }) {
   console.log("this is buyer selection in their page", buyerSelection);
+  console.log("This is refreshKey at accept bid ",refreshKey);
   const handleAccept = async () => {
     const acceptResult = await postApi(`/orders/accept/${buyerSelection.bidId}`,
       { bidId: buyerSelection.bidId },
     );
     if (acceptResult.success) {
-      await setrefreshKey;
       toast.success(acceptResult.message);
+      await setrefreshKey?.();
       setTimeout(() => {
         onClose();
-      }, 2000);
+      }, 3000);
     } else {
+      await setrefreshKey?.();
       toast.error(acceptResult.message);
     }
   };
@@ -92,7 +95,7 @@ export default function AcceptedBid({
             Cancel
           </button>
           <button
-            className="px-5 py-2 rounded-lg back_lime text-white font-medium hover:bg-lime-700"
+            className="px-5 py-2 rounded-lg back_lime text-white font-medium hover:bg-lime-700 cursor-pointer" 
             onClick={handleAccept}
           >
             Accept & Notify Buyer

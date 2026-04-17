@@ -38,7 +38,9 @@ const services = [
 
 export default function ServicesSection() {
   return (
-    <section className="py-12 md:py-20 bg-white">
+    <section className="py-12 md:py-20   px-4 sm:px-6 lg:px-8 bg-white">
+    
+      <div className="max-w-7xl mx-auto">
 
       {/* TITLE */}
       <div className="text-center px-4">
@@ -53,11 +55,11 @@ export default function ServicesSection() {
       </div>
 
       {/* CARDS */}
-      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto px-4 md:px-10 text-black">
+      <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto  text-black">
         {services.map((item) => (
           <div
             key={item.id}
-            className="bg-white rounded-2xl shadow hover:shadow-2xl transition duration-300 flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition duration-300 flex flex-col overflow-hidden"
           >
             {/* IMAGE */}
             <div className="h-44 w-full overflow-hidden">
@@ -70,7 +72,7 @@ export default function ServicesSection() {
 
             {/* CONTENT */}
             <div className="p-5 flex flex-col flex-grow">
-              <h4 className="font-semibold text-lg">{item.name}</h4>
+              <h4 className=" text-lg">{item.name}</h4>
 
               <p className="text-sm mt-2 text-gray-600 flex-grow">
                 {item.description}
@@ -78,7 +80,7 @@ export default function ServicesSection() {
 
               {/* PRICE + BUTTON */}
               <div className="flex justify-between items-center mt-4">
-                <span className="font-semibold">₹{item.price}</span>
+                <span className=" text_lime ">₹{item.price}/day</span>
 
                 <button className="bg-lime-500 text-white px-4 py-2 rounded-lg text-sm">
                   Book Now
@@ -88,6 +90,8 @@ export default function ServicesSection() {
           </div>
         ))}
       </div>
+      </div>
+      
     </section>
   );
 }

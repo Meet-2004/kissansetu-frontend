@@ -34,9 +34,11 @@ api.interceptors.response.use(
 
       try {
 
-        await api.post("/users/refresh", {}, {
+       const refresh= await api.post("/users/refresh", {}, {
           withCredentials: true
         });
+
+        console.log("ths is refresh at interceptors",refresh);
 
         // retry original request
         return api(originalRequest);

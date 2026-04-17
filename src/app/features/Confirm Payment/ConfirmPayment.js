@@ -15,9 +15,12 @@ export default function ConfirmPayment({
   totalOrderPrice,
   isPartial,
   partialQuantity,
-  setnotificationRefreshKey,
+  confirmPaymentRefreshKey,
+ 
 }) {
   console.log("This is selected list :", selectedListData);
+
+  console.log("hello i am payment sucess modal");
   const [paymentSucess, setpaymentSucess] = useState(false);
   const [otp, setOtp] = useState(null);
   const getImageUrls = (path) => `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
@@ -63,12 +66,14 @@ export default function ConfirmPayment({
         }, 2000);
       }
     } else {
-      const orderId = selectedListData.orderId;
+      const orderId = selectedListData?.orderId;
       const auctionpostApis = await postApi(`orders/${orderId}/confirm`);
+      console.log("This is auctionapis",auctionpostApis);
       if (auctionpostApis.success) {
          await setOtp(auctionpostApis?.data?.otp);
-        setnotificationRefreshKey();
-        setpaymentSucess(true);
+         confirmPaymentRefreshKey();
+         setpaymentSucess(true);
+        // confirmPaymentRefreshKey();
       } else {
         toast.error(auctionpostApis.message);
       }
@@ -79,8 +84,8 @@ export default function ConfirmPayment({
     <>
       <Toast times={4000} />
 
-      <div className="flex justify-center items-center inset-0 fixed z-50 bg-black/40">
-        <div className="bg-white max-w-[25cm] min-w-[35cm] max-h-[90vh]  rounded-2xl shadow-2xl p-6 relative">
+      <div className="flex justify-center items-center inset-0 fixed z-50 bg-black/40 ">
+        <div className="bg-white max-w-[25cm] min-w-[35cm] max-h-[95vh]  rounded-2xl shadow-2xl p-6 relative">
           {/* CLOSE BUTTON */}
           <div
             className="absolute right-5 top-5 text-gray-500 cursor-pointer"
@@ -221,14 +226,14 @@ export default function ConfirmPayment({
           {/* BUTTONS */}
           <div className="flex gap-4 mt-6">
             <button
-              className="flex-1 border border-gray-300 py-3 rounded-lg text-gray-700 hover:bg-gray-100"
+              className="flex-1 border border-gray-300 py-3 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer"
               onClick={onCloseConfirmPayment}
             >
               Back
             </button>
 
             <button
-              className="flex-1 bg-lime-500 text-white py-3 rounded-lg font-semibold hover:bg-lime-600"
+              className="flex-1 bg-lime-500 text-white py-3 rounded-lg font-semibold hover:bg-lime-600 cursor-pointer"
               onClick={() => handlConfirm()}
             >
               Confirm & Pay ₹{totalOrderPrice}

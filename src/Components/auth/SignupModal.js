@@ -3,21 +3,18 @@ import { postApi } from "@/services/apiService";
 import * as Yup from "yup";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import axios from "axios";
 import { handleApi } from "../../lib/apiHndler";
 import { loginSuccess } from "../../app/Store/slices/authSlice";
 import { headFont } from "@/app/layout";
 import google from "../../../public/google.svg";
 import Image from "next/image";
-import login from "@/Components/auth/LoginModal";
-import Link from "next/link";
 import { ToastContainer, toast } from "react-toastify";
 import Toast from "@/Components/Alert/Toast";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 // import Dashboard from "../../app/Dashboard/page"
 
-export default function SignupModal({ onClose,openLogin }) {
-  const router=useRouter();
+export default function SignupModal({ onClose, openLogin, toggleSignup,openLoginCloseSignup,onCloseSignup }) {
+  const router = useRouter();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     // lastName: "",
@@ -26,11 +23,11 @@ export default function SignupModal({ onClose,openLogin }) {
     mobileNumber: "",
     password: "",
     confirmPassword: "",
-  
 
     // userType: "",
     // check:false,
   });
+  const [isLoading, setisLoading] = useState(false);
 
   const validations = Yup.object({
     fullName: Yup.string()
@@ -38,7 +35,8 @@ export default function SignupModal({ onClose,openLogin }) {
       .min(5, "required")
       .matches(
         /^[a-zA-Z]+(?: [A-Za-z]+){0,2}$/,
-        "only alphabets and two space are allowed ",)
+        "only alphabets and two space are allowed ",
+      )
       .required("Name Required"),
     email: Yup.string().email("Enter valid email").required("Email Required"),
     mobileNumber: Yup.string()
@@ -61,11 +59,26 @@ export default function SignupModal({ onClose,openLogin }) {
 
   const handleChange = async (e) => {
     // const { name, value, type, checked } = e.target;
+
+    const val=e.target.value;
+  
+    if(e.target.name ==="mobileNumber"){
+      if(val === "" || /^\d+$/.test(val)){
+         setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+
+      }else{
+        // seterror({[e.target.name]:"Only digits Are allowed"})
+      }
+    }else{
     setFormData({
       ...formData,
       [e.target.name]:
         e.target.type === "checkbox" ? e.target.checked : e.target.value,
     });
+  }
     seterror((prev) => ({
       ...prev,
       [e.target.name]: "",
@@ -84,28 +97,35 @@ export default function SignupModal({ onClose,openLogin }) {
       // const result = await handleApi(() =>
       //   axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users/signup`, formData),
       // );
-     const result = await postApi("/users/signup", formData);
-
-
+      setisLoading(true);
+      const result = await postApi("/users/signup", formData);
+      console.log("result", result);
       //Toast message
-       if(!result.success){
+      if (!result.success) {
         console.log(result);
-      toast.error(result.message,{
-        style:{  
-          color:"white",
-        }
-      });
-    }
-      if (result.success){
 
+        toast.error(result.message, {
+          style: {
+            color: "white",
+          },
+        });
+        setisLoading(false);
+      }
+      if (result.success) {
         toast.success(result.message);
-         console.log(result);
+        setisLoading(false);
+        console.log(result);
         const user = result.data?.user;
         // const token = result.data?.token;
-      dispatch(loginSuccess({user:result?.data?.data?.fullName,id:result?.data?.data?.id,userMail:result?.data?.data?.email,}))
+        dispatch(
+          loginSuccess({
+            user: result?.data?.data?.fullName,
+            id: result?.data?.data?.id,
+            userMail: result?.data?.data?.email,
+          }),
+        );
 
-       router.push("/dashboard");
-     
+        router.push("/dashboard");
 
         if (!user) {
           console.log("User and token does not recieved by backend");
@@ -117,7 +137,7 @@ export default function SignupModal({ onClose,openLogin }) {
         // localStorage.setItem("token", token);
 
         // Save in Redux
-       
+
         // Redirect
         // if (user.role === "FARMER") {
         //   // router.push("/farmer/dashboard");
@@ -141,15 +161,15 @@ export default function SignupModal({ onClose,openLogin }) {
         {/* Overlay */}
         <div
           className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={onClose}
+          // onClick={onClose}
         />
 
         {/* Modal Card */}
-        <div className="relative bg-[#F3EFE4] w-full max-w-lg rounded-2xl shadow-2xl p-10 z-50 h-155 overflow-y-auto">
+        <div className="relative bg-[#F3EFE4] md:w-full md:max-w-lg max-w-sm rounded-2xl shadow-2xl p-10 z-50 h-155 overflow-y-auto ">
           {/* Close Button */}
           <button
-            onClick={onClose}
-            className="absolute top-5 right-6 text-gray-500 hover:text-black text-xl"
+            onClick={onCloseSignup}
+            className="absolute top-5 cursor-pointer right-6 text-gray-500 hover:text-black text-xl"
           >
             ✕
           </button>
@@ -208,6 +228,7 @@ export default function SignupModal({ onClose,openLogin }) {
                     value={formData.mobileNumber}
                     onChange={handleChange}
                     name="mobileNumber"
+                     maxLength={10}
                     type="text"
                     placeholder="+91 98765 43210"
                     className="w-full mt-2 px-3 py-2 rounded-xl border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
@@ -336,9 +357,17 @@ export default function SignupModal({ onClose,openLogin }) {
               {/* Create Button */}
               <button
                 type="submit"
-                className="w-full bg-lime-500 text-white py-2 mt-1 rounded-xl hover:bg-lime-600 cursor-pointer transition font-medium"
+                className={
+                  isLoading
+                    ? "w-full rounded-xl justify-center items-center flex"
+                    : " w-full bg-lime-500 text-white py-2 mt-1 rounded-xl hover:bg-lime-600 cursor-pointer transition font-medium"
+                }
               >
-                Create Account
+                {isLoading ? (
+                  <div className="loader h-50 w-60"></div>
+                ) : (
+                  "Create Account"
+                )}
               </button>
 
               {/* Divider */}
@@ -359,7 +388,10 @@ export default function SignupModal({ onClose,openLogin }) {
               {/* Login Link */}
               <p className="text-center text-sm text-gray-600 mt-4">
                 Already have an account?{" "}
-                <span className="text-lime-500 font-medium hover:underline cursor-pointer" onClick={()=>{onClose();openLogin()}}>
+                <span
+                  className="text-lime-500 font-medium hover:underline cursor-pointer"
+                  onClick={()=>openLoginCloseSignup()}
+                >
                   Login
                 </span>
               </p>

@@ -5,9 +5,9 @@ import { getApi } from "@/services/apiService";
 export const fetchAuctions = createAsyncThunk(
 
   "bid/fetchAuctions",
-  async (page=0, { rejectWithValue }) => {
+  async ({page=0,search=""}, { rejectWithValue }) => {
     try {
-      const result = await getApi(`/buyers/auctions/?page=${page}`);
+      const result = await getApi(search?`/buyers/auctions/?page=${page}&search=${search}`:`/buyers/auctions/?page=${page}`);
 
       if(result.success){
         console.log("hello");
@@ -31,6 +31,7 @@ const initialState = {
   lastUpdated: null,
   page:0,
   totalPages:1,
+  
 
 };
 
@@ -56,7 +57,9 @@ const bidSlice = createSlice({
         state.auctions = action.payload;
         state.lastUpdated = Date.now();
          state.page = action.payload.number;  
-          state.totalPages = action.payload.totalPages;    
+          state.totalPages = action.payload.totalPages; 
+          // state.searchText=  action.payload.searchText;
+
         state.error = null;
       })
       .addCase(fetchAuctions.rejected, (state, action) => {

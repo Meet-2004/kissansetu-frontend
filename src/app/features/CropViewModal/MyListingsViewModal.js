@@ -6,6 +6,8 @@ import "@/app/globals.css";
 import { getApi } from "@/services/apiService";
 import { useSelector } from "react-redux";
 import AcceptedBid from "../AcceptBid/AcceptedBid";
+import { putMultipartApi } from "@/services/apiService";
+import ExtendAuctionModal from "../Extend Auction Time/ExtendAuctionTime";
 
 export default function MyListingsViewModal({
   onClose,
@@ -19,6 +21,11 @@ export default function MyListingsViewModal({
   const [buyerSelection, setbuyerSelection] = useState();
   const [singleBidData, setsingleBidData] = useState();
   const [refreshKey,setrefreshKey]=useState(0);
+    const [extendAuctionTime,setExtendAuctionTime]=useState(false);
+    const [auctionExtendTimeData,setauctionExtendTimeData]=useState();
+      const [refreshExtendAuctionTimeCount,setRefreshExtendAuctionTimeCount]=useState(0);
+    
+
 //   const[isAccepted,setisAccepted]=useState(false);
   // const cropData = useMemo(() => (crop ? [crop] : []), [crop]);
   const getImageUrls = (path) => `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
@@ -46,7 +53,7 @@ export default function MyListingsViewModal({
     }
     getBidHistory();
    
-  }, [refreshKey]);
+  }, [refreshKey,refreshExtendAuctionTimeCount]);
   console.log(singleBidData);
 let isAccepted;
 // console.log("this is your things",(singleBidData[0] && singleBidData[0].top5Bids && singleBidData[0].top5Bids.length > 0));
@@ -98,6 +105,15 @@ if(singleBidData && singleBidData.length > 0 && singleBidData[0].top5Bids && sin
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
   };
+  const handleMarkAsSold = async ()=>{
+       const userData=localStorage.getItem("persist:auth");
+    const userId=JSON.parse(userData).id;
+        // let listingId = crop?.listingId;
+      const markAsSold=await putMultipartApi(`/listings/seller/${selectedList?.listingId}/mark-sold?sellerId=${userId}`);
+      console.log(markAsSold);
+  
+    }
+  
 
   // const getBidTimestamp = (bid) => {
   //   if (!bid) return null;
@@ -270,24 +286,24 @@ if(singleBidData && singleBidData.length > 0 && singleBidData[0].top5Bids && sin
                   </div>
 
                   {/* RIGHT PANEL */}
-                  <div className="bg-gray-50 p-5 rounded-xl h-fit">
-                    <h4 className="font-semibold mb-4 text_black">
-                      Manage Listing
-                    </h4>
+                  <div className="bg-gray-50 p-5 rounded-xl h-fit shadow-lg border-2 border-gray-300">
+                      <h4 className="font-semibold mb-4 text_black">
+                        Manage Listing
+                      </h4>
 
-                    <button className="w-full bg-green-600 text-white py-2 rounded-lg mb-3">
-                      ✔ Mark as Sold
-                    </button>
-                    {crop.saleType === "AUCTION" && (
-                      <button className="w-full border py-2 rounded-lg mb-3 text_black">
-                        ⏱ Extend Auction Time
+                      {crop?.saleType === "AUCTION" && (
+                        <button className="w-full border py-2 rounded-lg mb-3 text_black cursor-pointer" onClick={()=>{setauctionExtendTimeData({cropName:crop?.cropName,variety:crop?.variety,sellerId:crop?.sellerId,listingId:crop?.listingId});setExtendAuctionTime(true)}}>
+                          ⏱ Extend Auction Time
+                        </button>
+                      )}
+
+                      <button
+                        className="w-full border border-red-400 text-red-500 py-2 rounded-lg cursor-pointer"
+                        onClick={() => deleteListing(crop?.listingId)}
+                      >
+                        🗑 Delete Listing
                       </button>
-                    )}
-
-                    <button className="w-full border border-red-400 text-red-500 py-2 rounded-lg">
-                      🗑 Delete Listing
-                    </button>
-                  </div>
+                    </div>
                 </div>
 
                 {/* PRODUCT DETAILS */}
@@ -731,6 +747,7 @@ if(singleBidData && singleBidData.length > 0 && singleBidData[0].top5Bids && sin
           setrefreshKey={()=>setrefreshKey(refreshKey+1)}
         />
       )}
+      {extendAuctionTime && <ExtendAuctionModal setRefreshExtendAuctionTimeCount={()=>setRefreshExtendAuctionTimeCount(refreshExtendAuctionTimeCount+1)} auctionExtendTimeData={auctionExtendTimeData} onClose={()=>setExtendAuctionTime(false)}  />}
     </div>
   );
 }

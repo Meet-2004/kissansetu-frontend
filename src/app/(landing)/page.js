@@ -7,11 +7,14 @@ import TestimonialsSection from "../../Components/landing/TestimonialsSection";
 import StatsSection from "../../Components/landing/StatsSection";
 import { getApi } from "@/services/apiService";
 import {useEffect} from "react";
+import {useRouter} from "next/navigation";
 
 
 
 
 export default function Home() {
+
+  const route=useRouter();
 
 useEffect(()=>{
 async function getAuth(){
@@ -24,25 +27,28 @@ async function getAuth(){
       credentials: "include"
     }
   });
+if(response.status === 200){
+  console.log("User is authenticated");
+  route.push("/dashboard");
   console.log(response);
+}
+else{
+  route.push("/");
+}
 }
 
 getAuth();
-
 },[])
-
-
-
-
 
   return (
     <>
      
-      <HeroSection />
+      <HeroSection  />
+       <StatsSection />
       <ServicesSection />
       <HowItWorksSection />
       <TestimonialsSection />
-      <StatsSection />
+     
      
     </>
   );

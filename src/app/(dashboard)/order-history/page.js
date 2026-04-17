@@ -19,6 +19,7 @@ import ReportBox from "@/app/features/Report Box/ReportBox";
 import { MdLockOutline } from "react-icons/md";
 import Image from "next/image";
 import { getApi } from "@/services/apiService";
+import { headFont } from "@/app/layout";
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState();
@@ -100,17 +101,17 @@ console.log("report data at page",reportCardDeta);
   window.URL.revokeObjectURL(url);
 }
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6 space-y-3 sm:space-y-6">
       {/* TITLE */}
       <div>
-        <h1 className="text-2xl font-semibold text-black">Order History</h1>
-        <p className="text-gray-500 mb-4">
+        <h1 className={`text-xl sm:text-2xl text-3xl text-black ${headFont.className}`}>Order History</h1>
+        <p className="text-sm sm:text-base text-gray-500 mb-2 sm:mb-4">
           Complete record of all your past transactions
         </p>
       </div>
 
       {/* ================= STATS ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
         <StatCard icon={<Package />} value={stats.total} label="Total Orders" />
         <StatCard
           icon={<TrendingUp />}
@@ -127,21 +128,21 @@ console.log("report data at page",reportCardDeta);
       </div>
 
       {/*  SEARCH + FILTER  */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6 bg-white p-4  rounded-xl border border-gray-300">
+      <div className="flex flex-col md:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-xl border border-gray-300">
         <input
           type="text"
           placeholder="Search by product, order ID, or buyer/seller..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 p-3 rounded-lg border-2 border-gray-300 outline-none text-black h-10"
+          className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-300 outline-none text-black h-10 text-sm sm:text-base"
         />
 
-        <div className="flex gap-2 text-black">
+        <div className="grid grid-cols-3 gap-2 text-black md:flex">
           {["all", "purchases", "sales"].map((f, index) => (
             <button
               key={index}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg capitalize ${
+              className={`px-2 sm:px-4 py-2 rounded-lg capitalize text-xs sm:text-sm ${
                 filter === f ? "back_lime text-white" : "bg-gray-200"
               } h-10`}
             >
@@ -238,12 +239,12 @@ function OrderCard({
 
   console.log("This is orders inside list", orders);
   return (
-    <div className="bg-white p-5 rounded-xl border shadow-sm flex flex-col md:flex-row gap-45 hover:shadow-xl transition ">
+    <div className="bg-white p-3 sm:p-5 rounded-xl border shadow-sm flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-8 hover:shadow-xl transition">
       {/* LEFT */}
-      <div className="flex gap-4 flex-1">
-        <div className="flex flex-col">
+      <div className="flex gap-3 sm:gap-4 md:flex-1 md:w-50">
+        <div className="flex flex-col shrink-0">
           <span
-            className={`bg-blue-1 px-2 py-1 text-xs rounded w-full text-center ${orders?.type === "SOLD" ? "bg-green-50 text-green-600" : "bg-blue-50 text-blue-600"}`}
+            className={`bg-blue-1 px-2 py-1 text-[10px] sm:text-xs rounded w-full text-center font-medium ${orders?.type === "SOLD" ? "bg-green-50 text-green-600" : "bg-blue-50 text-blue-600"}`}
           >
             {orders.type}
           </span>
@@ -252,33 +253,33 @@ function OrderCard({
             alt="Image"
             width={300}
             height={250}
-            className="w-25 h-25 rounded-lg object-cover mt-2"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg object-cover mt-2"
             unoptimized
           />
         </div>
 
-        <div>
-          <h2 className="font-semibold text-lg text-black">
+        <div className="min-w-0">
+          <h2 className="font-semibold text-base sm:text-lg text-black truncate">
             {orders.commodity}
           </h2>
-          <p className="text-sm text-gray-500">{orders.variety}</p>
+          <p className="text-xs sm:text-sm text-gray-500 truncate">{orders.variety}</p>
 
           <div className="flex flex-col gap-1 mt-1">
-            <span className="text-sm text-gray-400">#{orders.orderId}</span>
-            <p className="text_lime font-semibold text-2xl">₹{orders.amount}</p>
+            <span className="text-xs sm:text-sm text-gray-400">#{orders.orderId}</span>
+            <p className="text_lime font-semibold text-xl sm:text-2xl">₹{orders.amount}</p>
 
           </div>
           { orders.type === "PURCHASED" && 
           <>
-          <div className="mt-5 w-30">
-            <p className="text-gray-600 text-sm ">Your OTP Code</p>
-            <div className={`flex p-2  mt-1 gap-2 rounded-lg ${orders.paymentLabel=== "PAYMENT_HELD" ? "border-2 bg-[#64b900]/10 border-[#64b900] text_lime" :  "border-gray-300 border-2 bg-gray-100 text-gray-500"}`}>
-              <p className="flex justify-center items-center  text-xl"><MdLockOutline /></p>
-              <p className=" text-xl ">{orders.otp}</p>
+          <div className="mt-3 sm:mt-5 w-32">
+            <p className="text-gray-600 text-xs sm:text-sm">Your OTP Code</p>
+            <div className={`flex p-2 mt-1 gap-2 rounded-lg ${orders.paymentLabel=== "PAYMENT_HELD" ? "border-2 bg-[#64b900]/10 border-[#64b900] text_lime" :  "border-gray-300 border-2 bg-gray-100 text-gray-500"}`}>
+              <p className="flex justify-center items-center text-lg sm:text-xl"><MdLockOutline /></p>
+              <p className="text-lg sm:text-xl">{orders.otp}</p>
             </div>
           </div>
           <div>
-            <p className="text-gray-600 text-xs">{orders.paymentLabel=== "PAYMENT_HELD" ? "Share with seller for payment release" :"✓ Used by seller"}</p>
+            <p className="text-gray-600 text-xs md:w-50 mt-1">{orders.paymentLabel=== "PAYMENT_HELD" ? "Share with seller for payment release" :"✓ Used by seller"}</p>
             </div>
             </>
 }
@@ -286,7 +287,7 @@ function OrderCard({
       </div>
 
       {/* CENTER */}
-      <div className="flex flex-col gap-1 text-sm">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs sm:text-sm md:flex md:flex-col md:gap-1 md:min-w-44">
         {/* <StatusBadge status={orders.status} /> */}
 
         <div>
@@ -294,18 +295,18 @@ function OrderCard({
           <p className="text-black">{orders.quantity} Quintal</p>
         </div>
 
-        <div className="flex items-center gap-1 text-gray-600 ">
-          <div className="flex flex-col w-5  ">
+        <div className="flex items-start gap-1 text-gray-600">
+          <div className="flex flex-col w-4 sm:w-5 pt-1">
             <p className="flex items-center justify-center">
               <User size={16} className="flex items-center justify-center" />
             </p>
           </div>
-          <div className=" flex flex-col w-25 mt-2">
+          <div className="flex flex-col min-w-0 md:w-24">
             <p className="text-xs">
               {" "}
               {orders.type === "SOLD" ? "Buyer " : "Seller"}
             </p>
-            <p className="text-black text-sm">
+            <p className="text-black text-sm truncate">
               {orders.type === "SOLD"
                 ? `${orders.buyerName}`
                 : `${orders.sellerName}`}
@@ -313,12 +314,12 @@ function OrderCard({
           </div>
         </div>
 
-        <p className="flex items-center gap-2 text-gray-600 mt-2">
+        <p className="flex items-center gap-1 sm:gap-2 text-gray-600 md:mt-2 min-w-0">
           <MapPin size={14} />
-          {orders.district},{orders.state}
+          <span className="truncate">{orders.district},{orders.state}</span>
         </p>
 
-        <p className="flex items-center gap-2 text-gray-400 text-xs mt-2">
+        <p className="flex items-center gap-1 sm:gap-2 text-gray-400 text-xs md:mt-2">
           <Calendar size={14} />
           <span className="text-gray-600">Ordered:</span>{" "}
           <span className="text-black">{`${orders.orderedAt[2]}-${orders.orderedAt[1]}-${orders.orderedAt[0]}`}</span>
@@ -326,9 +327,9 @@ function OrderCard({
       </div>
 
       {/* RIGHT ACTIONS */}
-      <div className="flex flex-col gap-2 md:w-45 flex-1  items-center"  >
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:flex-col md:w-[100%] md:items-center   md:flex-none">
         <button
-          className="back_lime text-white py-3 w-67 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+          className="back_lime text-white py-2.5 md:w-[80%] md:py-3 w-full rounded-lg flex items-center justify-center gap-2 cursor-pointer"
           onClick={() => { setratingReviewData({
               Image: orders?.images[0]?.filePath,
               cropName: orders.commodity,
@@ -344,7 +345,7 @@ function OrderCard({
         </button>
 
         <button
-          className="border border-red-400 text-red-500 py-3 w-67 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+          className="border border-red-400 md:w-[80%] text-red-500 py-2.5 md:py-3 w-full rounded-lg flex items-center justify-center gap-2 cursor-pointer"
           onClick={() => {
               setreportCardDetail({
               Image: orders?.images[0]?.filePath,
@@ -369,7 +370,7 @@ function OrderCard({
 
         {orders.type === "SOLD" && orders.paymentLabel !== "RELEASED" && (
           <button
-            className="back_lime text-white py-3 w-67 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+            className="back_lime text-white py-2.5 md:w-[80%] md:py-3 w-full rounded-lg flex items-center justify-center gap-2 cursor-pointer sm:col-span-2 md:col-span-1"
             onClick={() => {
               setorderId(orders.orderId);
               setamountAtOtp(orders.amount);
@@ -381,7 +382,7 @@ function OrderCard({
         )}
 
         {orders.orderStatus === "COMPLETED" &&  orders.paymentLabel === "RELEASED" && (
-          <button className="border-2 border-gray-300 py-3 w-67 text-black rounded-lg flex items-center justify-center gap-2 cursor-pointer" onClick={()=>handleDownload(orders.orderId)}>
+          <button className="border-2 border-gray-300 md:w-[80%] py-2.5 md:py-3 w-full text-black rounded-lg flex items-center justify-center gap-2 cursor-pointer sm:col-span-2 md:col-span-1" onClick={()=>handleDownload(orders.orderId)}>
             <Download size={16} />{" "}
             <span className="text-xs">Download Invoice</span>
           </button>

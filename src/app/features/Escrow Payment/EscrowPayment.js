@@ -13,7 +13,7 @@ import "@/app/globals.css";
 import ConfirmPayment from "../Confirm Payment/ConfirmPayment";
 import Image from "next/image";
 
-export default function EscrowPayment({ onClose,setEscrowModal,onEscrowClosed,escrowModal,selectedListData, isPartial,partialQuantity,setisPartial,setnotificationRefreshKey}) {
+export default function EscrowPayment({ onClose,setEscrowModal,onEscrowClosed,escrowModal,selectedListData, isPartial,partialQuantity,setisPartial,confirmPaymentRefreshKey}) {
   const [payment, setPayment] = useState("upi");
   const [confirmPayment,setconfirmPayment]=useState(false);
   // const [totalOrderPrice,settotalOrderPrice]=useState(5);
@@ -278,7 +278,7 @@ setpartialTotalPrice(partialQuantity*selectedListData.pricePerKg);
       }
     </div>
     {
-        confirmPayment && <ConfirmPayment setnotificationRefreshKey={setnotificationRefreshKey} onClose={()=>{setEscrowModal(false);setisPartial(false);setconfirmPayment(false);}} onCloseConfirmPayment={()=>setconfirmPayment(false)} selectedListData={selectedListData} totalOrderPrice={totalOrderPrice}  isPartial={isPartial} partialQuantity={partialQuantity}/>
+        confirmPayment && <ConfirmPayment confirmPaymentRefreshKey={confirmPaymentRefreshKey}  onClose={()=>{setEscrowModal(false);setisPartial(false);setconfirmPayment(false);}} onCloseConfirmPayment={()=>setconfirmPayment(false)} selectedListData={selectedListData} totalOrderPrice={totalOrderPrice}  isPartial={isPartial} partialQuantity={partialQuantity}/>
 
     }
     </div>

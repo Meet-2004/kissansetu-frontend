@@ -4,9 +4,11 @@ import { getApi } from "@/services/apiService";
 // Async thunk for fetching fixed
 export const fetchFixed = createAsyncThunk(
   "fixed/fetchFixed",
-  async (page=0, { rejectWithValue }) => {
+  
+  async ({page=0,search=""}, { rejectWithValue }) => {
+    console.log("this is search at redux !!!!!!!!",search);
     try {
-      const result = await getApi(`/buyers/fixed?page=${page}`);
+      const result = await getApi(search ? `/buyers/fixed?page=${page}&search=${search}` :  `/buyers/fixed?page=${page}` );
       if(result.success){
         console.log("hello");
       }

@@ -1,274 +1,338 @@
 "use client";
-import { useRef, useCallback, useEffect } from "react";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-const useChatSocket = () => {
-  const socketRef = useRef(null);
-  const isConnectingRef = useRef(false);
-  const router = useRouter();
-  const [chatUsers, setChatUsers] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [currentChat, setCurrentChat] = useState(null);
-  const currentChatRef = useRef(null);
+const getLoggedInUserId = () => {
+  if (typeof window === "undefined") return null;
 
-  const mergeUniqueMessages = useCallback((incomingMessages) => {
-    const seen = new Set();
+  try {
+    const userData = localStorage.getItem("persist:auth");
+    if (!userData) return null;
 
-    return incomingMessages.filter((message) => {
-      const key = message?.id ?? `${message?.sender_id}-${message?.content}-${message?.timestamp}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, []);
-
-  const appendUniqueMessage = useCallback((previousMessages, nextMessage) => {
-    const nextKey =
-      nextMessage?.id ??
-      `${nextMessage?.sender_id}-${nextMessage?.content}-${nextMessage?.timestamp}`;
-
-    const alreadyExists = previousMessages.some((message) => {
-      const messageKey =
-        message?.id ?? `${message?.sender_id}-${message?.content}-${message?.timestamp}`;
-      return messageKey === nextKey;
-    });
-
-    if (alreadyExists) {
-      return previousMessages;
-    }
-
-    return [...previousMessages, nextMessage];
-  }, []);
-
-  //  Get userId
-  const getUserId = () => {
-    try {
-      const userData = localStorage.getItem("persist:auth");
-      if (!userData) return null;
-      const parsed = JSON.parse(userData);
-      return parsed?.id || null;
-    } catch {
-      return null;
-    }
-  };
-
-  const getParticipantName = useCallback((conversation) => {
-    return (
-      conversation?.participant_name ||
-      conversation?.participants_name ||
-      conversation?.conversation_name ||
-      ""
-    );
-  }, []);
-
-  const requestConversationMessages = useCallback((conversationId,name) => {
-    if (!conversationId || socketRef.current?.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
-    socketRef.current.send(
-      JSON.stringify({
-        type: "get_messages",
-        conversation_id: conversationId,
-        conversation_name:name,
-      })
-    );
-  }, []);
-
-  //  Handle backend events
-  const handleIncomingMessage = useCallback((data) => {
-    console.log("Handling message type:", data.type);
-    
-    switch (data.type) {
-      case "connection_established":
-        console.log("Socket ready");
-        break;
-
-      case "chat_users":
-        console.log("Sidebar users:", data.data);
-        setChatUsers(data.data);
-        break;
-
-      case "conversation":
-        console.log("Conversation received:", data.data);
-        // Store in ref for immediate access
-        currentChatRef.current = data.data;
-        setCurrentChat(currentChatRef.current);
-
-        //  After getting conversation → load messages
-        requestConversationMessages(data.data.id, getParticipantName(data.data));
-        
-        // Navigate with state to pass data
-        const participantName = getParticipantName(data.data);
-        const query = participantName
-          ? `?conversationId=${data.data.participant_id}&participantName=${encodeURIComponent(participantName)}`
-          : `?conversationId=${data.data.id}`;
-        router.push(`/messages${query}`);
-        break;
-
-      case "messages":
-        console.log("Chat history:", data.data);
-        setMessages(mergeUniqueMessages(data.data));
-        
-        // Extract conversation info from messages response if not already set
-        if (!currentChatRef.current && data.conversation_id) {
-          const conversationData = {
-            id: data.conversation_id,
-            participant_name:
-              currentChatRef.current?.participant_name ||
-              currentChatRef.current?.participants_name ||
-              currentChatRef.current?.conversation_name ||
-              "",
-            // You can add more fields here if backend provides them
-            messages_count: data.data?.length || 0,
-          };
-          currentChatRef.current = conversationData;
-          setCurrentChat(conversationData);
-          console.log("Conversation set from messages:", conversationData);
-        }
-        break;
-
-      case "new_message":
-        console.log("Live message:", data.message);
-        setMessages((prev) => appendUniqueMessage(prev, data.message));
-        break;
-
-      case "error":
-        console.error("Error:", data.message);
-        break;
-
-      default:
-        console.log("Unknown message type:", data);
-    }
-  }, [getParticipantName, requestConversationMessages, router]);
-
-  const connectWebSocket = useCallback((userId, onOpenCallback, name) => {
-  if (socketRef.current?.readyState === WebSocket.OPEN) {
-    onOpenCallback?.();
-    return;
+    const parsed = JSON.parse(userData);
+    return parsed?.id || null;
+  } catch {
+    return null;
   }
+};
+// ws://192.168.29.218:8000/ws/chat/${userId}`
+const getSocketUrl = (userId) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL_PYTHON || "ws://192.168.29.218:8000";
+  const wsUrl = apiUrl.replace(/^http/, "ws").replace(/\/$/, "");
 
-  if (socketRef.current?.readyState === WebSocket.CONNECTING || isConnectingRef.current) {
-    return;
-  }
+  return `${wsUrl}/ws/chat/${userId}`;
+};
 
-  isConnectingRef.current = true;
+const getParticipantId = (chat) => {
+  return chat?.participant_id || chat?.user_id || chat?.receiver_id || chat?.buyerId || null;
+};
 
-  socketRef.current = new WebSocket(
-    `ws://192.168.2.152:8000/ws/chat/${userId}`
+const getParticipantName = (chat) => {
+  return chat?.participant_name || chat?.name || chat?.conversation_name || "";
+};
+
+const getConversationId = (chat) => {
+  return chat?.conversation_id || chat?.id || null;
+};
+
+const getMessageKey = (message) => {
+  return (
+    message?.id ||
+    message?.message_id ||
+    `${message?.conversation_id || ""}-${message?.sender_id || ""}-${message?.content || ""}-${
+      message?.timestamp || message?.created_at || ""
+    }`
   );
+};
 
-  socketRef.current.onopen = () => {
-    isConnectingRef.current = false;
-    console.log("Connected");
-    socketRef.current.send(
-      JSON.stringify({
-        type: "get_chat_users",
-      })
-    );
-    onOpenCallback?.();
-  };
+const uniqueMessages = (incomingMessages = []) => {
+  const seen = new Set();
 
-  socketRef.current.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log("Message received:", data.type, data);
-    handleIncomingMessage(data);
-  };
+  return incomingMessages.filter((message) => {
+    const key = getMessageKey(message);
+    if (seen.has(key)) return false;
 
-  socketRef.current.onclose = () => {
-    isConnectingRef.current = false;
-    console.log("WebSocket closed");
-    socketRef.current = null;
-  };
-
-  socketRef.current.onerror = (error) => {
-    isConnectingRef.current = false;
-    console.error("WebSocket error:", error);
-  };
-}, [handleIncomingMessage]);
-
-  useEffect(() => {
-    return () => {
-      isConnectingRef.current = false;
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-    };
-  }, []);
-
-  //  Start chat (button click)
-  const handleMessageClick = (receiverId) => {
-  const senderId = getUserId();
-  console.log("Sender ID:", senderId, "Receiver ID:", receiverId);
-  if (!senderId) return;
-
-  connectWebSocket(senderId, () => {
-    // Send ONLY after connection is open
-    socketRef.current.send(
-      JSON.stringify({
-        type: "get_or_create_conversation",
-        participant_id: receiverId,
-        
-      })
-    );
+    seen.add(key);
+    return true;
   });
 };
 
-  const loadConversation = useCallback((conversationId, participantName = "") => {
-    const senderId = getUserId();
-    if (!senderId || !conversationId) return;
+const appendUniqueMessage = (previousMessages, nextMessage) => {
+  if (!nextMessage) return previousMessages;
 
-    const syncConversation = () => {
-      const conversationData = {
+  const nextKey = getMessageKey(nextMessage);
+  const alreadyExists = previousMessages.some((message) => getMessageKey(message) === nextKey);
+
+  return alreadyExists ? previousMessages : [...previousMessages, nextMessage];
+};
+
+const useChatSocket = () => {
+  const router = useRouter();
+  const socketRef = useRef(null);
+  const pendingOpenCallbacksRef = useRef([]);
+  const currentChatRef = useRef(null);
+  const selectedConversationIdRef = useRef(null);
+
+  const [chatUsers, setChatUsers] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentChat, setCurrentChat] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState("idle");
+
+  const syncCurrentChat = useCallback((chat) => {
+    currentChatRef.current = chat;
+    selectedConversationIdRef.current = chat?.id || null;
+    setCurrentChat(chat);
+  }, []);
+
+  const sendSocketPayload = useCallback((payload) => {
+    if (socketRef.current?.readyState !== WebSocket.OPEN) return false;
+
+    socketRef.current.send(JSON.stringify(payload));
+    return true;
+  }, []);
+
+  const requestChatUsers = useCallback(() => {
+    sendSocketPayload({ type: "get_chat_users" });
+  }, [sendSocketPayload]);
+
+  const requestConversationMessages = useCallback(
+    (conversationId) => {
+      if (!conversationId) return false;
+
+      return sendSocketPayload({
+        type: "get_messages",
+        conversation_id: conversationId,
+      });
+    },
+    [sendSocketPayload],
+  );
+
+  const handleIncomingMessage = useCallback(
+    (data) => {
+      switch (data?.type) {
+        case "connection_established":
+          break;
+
+        case "chat_users":
+          setChatUsers(Array.isArray(data.data) ? data.data : []);
+          break;
+
+        case "conversation": {
+          const conversation = data.data || {};
+          const nextChat = {
+            id: getConversationId(conversation),
+            participant_id: getParticipantId(conversation),
+            participant_name: getParticipantName(conversation),
+          };
+
+          syncCurrentChat(nextChat);
+          setMessages([]);
+          requestConversationMessages(nextChat.id);
+
+          const params = new URLSearchParams();
+          params.set("conversationId", nextChat.id);
+          if (nextChat.participant_id) params.set("participantId", nextChat.participant_id);
+          if (nextChat.participant_name) params.set("participantName", nextChat.participant_name);
+
+          router.push(`/messages?${params.toString()}`);
+          break;
+        }
+
+        case "messages": {
+          const responseConversationId = data.conversation_id || data.conversationId;
+
+          if (
+            responseConversationId &&
+            selectedConversationIdRef.current &&
+            String(responseConversationId) !== String(selectedConversationIdRef.current)
+          ) {
+            return;
+          }
+
+          setMessages(uniqueMessages(Array.isArray(data.data) ? data.data : []));
+          break;
+        }
+
+        case "new_message": {
+          const incomingConversationId =
+            data.message?.conversation_id || data.conversation_id || data.conversationId;
+
+          if (
+            incomingConversationId &&
+            selectedConversationIdRef.current &&
+            String(incomingConversationId) !== String(selectedConversationIdRef.current)
+          ) {
+            requestChatUsers();
+            return;
+          }
+
+          setMessages((prev) => appendUniqueMessage(prev, data.message));
+          requestChatUsers();
+          break;
+        }
+
+        case "error":
+          console.error("Chat socket error:", data.message || data);
+          break;
+
+        default:
+          break;
+      }
+    },
+    [requestChatUsers, requestConversationMessages, router, syncCurrentChat],
+  );
+
+  const flushOpenCallbacks = useCallback(() => {
+    const callbacks = pendingOpenCallbacksRef.current;
+    pendingOpenCallbacksRef.current = [];
+    callbacks.forEach((callback) => callback?.());
+  }, []);
+
+  const connectWebSocket = useCallback(
+    (userId = getLoggedInUserId(), onOpenCallback) => {
+      if (!userId) return false;
+
+      if (onOpenCallback) {
+        pendingOpenCallbacksRef.current.push(onOpenCallback);
+      }
+
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        flushOpenCallbacks();
+        return true;
+      }
+
+      if (socketRef.current?.readyState === WebSocket.CONNECTING) {
+        return true;
+      }
+
+      setConnectionStatus("connecting");
+      socketRef.current = new WebSocket(getSocketUrl(userId));
+
+      socketRef.current.onopen = () => {
+        setConnectionStatus("connected");
+        requestChatUsers();
+        flushOpenCallbacks();
+      };
+
+      socketRef.current.onmessage = (event) => {
+        try {
+          handleIncomingMessage(JSON.parse(event.data));
+        } catch (error) {
+          console.error("Invalid chat socket message:", error);
+        }
+      };
+
+      socketRef.current.onclose = () => {
+        setConnectionStatus("closed");
+        socketRef.current = null;
+      };
+
+      socketRef.current.onerror = (error) => {
+        setConnectionStatus("error");
+        console.error("Chat socket connection failed:", error);
+      };
+
+      return true;
+    },
+    [flushOpenCallbacks, handleIncomingMessage, requestChatUsers],
+  );
+
+  const handleMessageClick = useCallback(
+    (participantId, participantName = "") => {
+      if (!participantId) return false;
+
+      return connectWebSocket(getLoggedInUserId(), () => {
+        sendSocketPayload({
+          type: "get_or_create_conversation",
+          participant_id: participantId,
+          participant_name: participantName,
+        });
+      });
+    },
+    [connectWebSocket, sendSocketPayload],
+  );
+
+  const loadConversation = useCallback(
+    (conversationId, participantName = "", participantId = null) => {
+      if (!conversationId) return false;
+
+      const nextChat = {
         id: conversationId,
+        participant_id: participantId,
         participant_name: participantName,
       };
-      currentChatRef.current = conversationData;
-      setCurrentChat(conversationData);
-      requestConversationMessages(conversationId, participantName);
-    };
 
-    if (socketRef.current?.readyState === WebSocket.OPEN) {
-      syncConversation();
-      return;
-    }
+      syncCurrentChat(nextChat);
+      setMessages([]);
 
-    connectWebSocket(senderId, syncConversation);
-  }, [connectWebSocket, requestConversationMessages]);
-  //  Send message
- const sendMessage =(receiverId, content) => {
-    console.log("Sending message to:", receiverId, "Content:", content);
+      return connectWebSocket(getLoggedInUserId(), () => {
+        requestConversationMessages(conversationId);
+      });
+    },
+    [connectWebSocket, requestConversationMessages, syncCurrentChat],
+  );
 
-   socketRef.current?.send(
-      JSON.stringify({
+  const handleSidebarClick = useCallback(
+    (chatUser) => {
+      const conversationId = getConversationId(chatUser);
+      const participantId = getParticipantId(chatUser);
+      const participantName = getParticipantName(chatUser);
+
+      if (conversationId) {
+        loadConversation(conversationId, participantName, participantId);
+
+        const params = new URLSearchParams();
+        params.set("conversationId", conversationId);
+        if (participantId) params.set("participantId", participantId);
+        if (participantName) params.set("participantName", participantName);
+        router.push(`/messages?${params.toString()}`);
+
+        return true;
+      }
+
+      return handleMessageClick(participantId, participantName);
+    },
+    [handleMessageClick, loadConversation, router],
+  );
+
+  const sendMessage = useCallback(
+    (content) => {
+      const trimmedContent = content?.trim();
+      const receiverId = currentChatRef.current?.participant_id;
+
+      if (!receiverId || !trimmedContent) return false;
+
+      return sendSocketPayload({
         type: "send_message",
         receiver_id: receiverId,
-        content,
-      })
+        conversation_id: currentChatRef.current?.id,
+        content: trimmedContent,
+      });
+    },
+    [sendSocketPayload],
+  );
 
-    );
-    return true;
+  useEffect(() => {
+    connectWebSocket();
 
-  };
+    return () => {
+      pendingOpenCallbacksRef.current = [];
+      socketRef.current?.close();
+    };
+  }, [connectWebSocket]);
 
-  // Get current chat immediately (for sync access)
-  const getCurrentChat = () => {
-    return currentChatRef.current;
-  };
-
-console.log("this is chat", currentChatRef.current);
   return {
-    handleMessageClick,
-    sendMessage,
     chatUsers,
     messages,
     currentChat,
-    getCurrentChat,
-    currentChatRef,
+    currentUserId: getLoggedInUserId(),
+    connectionStatus,
+    handleSidebarClick,
+    handleMessageClick,
     loadConversation,
+    sendMessage,
     connectWebSocket,
-   
   };
 };
 

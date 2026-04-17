@@ -20,8 +20,9 @@ import OrderTypeModal from "../order Type/OrderTypeModal";
 import PartialConfirmPurchase from "@/app/features/Confirm Purchase (Partial)/PartialConfirmPuchase";
 import { handleApi } from "@/lib/apiHndler";
 import { useRef } from "react";
+import SkeletonCard from "@/app/features/Skeleton Card/SkeletonCard";
 
-export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
+export default function FixedCards({ crop, onBid, onView, buyerActiveTab,searchList}) {
   // const onBidClick = () => {
   //   console.log("Application successfull for bid");
   // };
@@ -34,6 +35,8 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
   const [isPartial, setisPartial] = useState(false);
   const [partialQuantity, setpartialQuantity] = useState(0);
   const [data, setData] = useState([]);
+
+  console.log("this is search list at fixed card ",searchList);
   // const [page, setPage] = useState(1);
   // const [totalPages, setTotalPages] = useState(1);
   // const [loading, setLoading] = useState(false);
@@ -69,24 +72,27 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
   console.log("this is page ref",pageRef.current);
   
   useEffect(() => {
+    if(searchList===""){
      dispatch(fetchFixed(pageRef.current));
+    }
+    else{
+      dispatch(fetchFixed({page:0,search:searchList}))
+    }
     const interval = setInterval(() => {
-      dispatch(fetchFixed(pageRef.current)); // always latest page
+      dispatch(fetchFixed({page:pageRef.current,search:searchList})); // always latest page
     }, 30000);
   
+  
     return () => clearInterval(interval);
-  }, [dispatch]);
+  }, [dispatch,searchList]);
 
-  const refreshAuctions = () => {
-    dispatch(invalidateAuctions());
-    dispatch(fetchFixed());
-  };
+  
 
    const handleNextPage =()=>{
       console.log("this is page",page);
       console.log("this is total page",totalPages);
       if (page < totalPages - 1) {
-      dispatch(fetchFixed(page + 1));
+      dispatch(fetchFixed({page:page + 1,search:searchList}));
       pageRef.current=page+1;
   
     }
@@ -94,7 +100,7 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
 
   const handlePreviousPage = () => {
       if (page > 0) {
-        dispatch(fetchFixed(page - 1));
+      dispatch(fetchFixed({page:page - 1,search:searchList}));
          pageRef.current=page-1;
       }
   }
@@ -105,9 +111,9 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {/* {ActiveTab ==="Auctions" &&} */}
-        {ActiveTab === "Fixed" && loading ? (
-          <div className="col-span-3 text-center py-8">Loading auctions...</div>
-        ) : error ? (
+        {buyerActiveTab === "Fixed" && loading ? (
+        <SkeletonCard Count={3} />
+        ) : error && buyerActiveTab === "Fixed" ? (
           <div className="col-span-3 text-center py-8 text-red-500">
             Error loading auctions: {error}
           </div>
@@ -171,9 +177,9 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
 
                     {/* bid */}
                     <div className="bg-[#64B90020] border border-[#64B90040] rounded-2xl px-5 py-4 flex-1">
-                      <p className="text-xs text_lime mb-1">CURRENT BID</p>
+                      <p className="text-xs text_lime mb-1">FIXED PRICE</p>
                       <p className="font-semibold text-sm text_lime">
-                        ₹{item.currentHighestBid}
+                        ₹{item.basePrice}
                       </p>
                     </div>
                   </div>
@@ -220,6 +226,7 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
         )}
       </div>
       {/* PAGINATION */}
+      { fixed?.totalPages > 0 && 
         <div className="flex flex-wrap justify-center mt-8 gap-2">
               <button
                 onClick={handlePreviousPage}
@@ -247,6 +254,7 @@ export default function FixedCards({ crop, onBid, onView, ActiveTab }) {
                 Next
               </button>
             </div>
+}
       {bidPlaced && (
         <Buynow
           Onclose={() => setbidPlaced(false)}

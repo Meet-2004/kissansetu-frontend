@@ -63,7 +63,7 @@ export default function FeaturesSection() {
   return (
     <>
       {/* TOP HEADING */}
-      <section className="bg-white py-12 md:py-20 text-center px-4">
+      <section className="bg-white py-27 md:py-40 text-center px-4 ">
         <h3 className={`text-3xl md:text-5xl text-black ${headFont.className}`}>
           Our <span className="text-lime-500">Features</span>
         </h3>

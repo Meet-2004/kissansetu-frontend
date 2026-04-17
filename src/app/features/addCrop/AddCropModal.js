@@ -48,7 +48,7 @@ export default function AddCropModal({
       <div className="
         bg-white 
         w-full
-        md:min-w-[180vh]
+        md:min-w-[150vh]
         max-w-[200vh]
         sm:w-[90%] 
         lg:w-[70%] 
@@ -73,6 +73,7 @@ export default function AddCropModal({
             text-xl 
             text-gray-500 
             hover:text-black
+            cursor-pointer
           "
         >
           ✕

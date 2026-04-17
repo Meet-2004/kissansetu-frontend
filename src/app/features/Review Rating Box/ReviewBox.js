@@ -34,8 +34,9 @@ export default function RateReviewModal({
     console.log("Review Data:", payload);
 
     // API call here
-   
-   const postReview= await postApi(`/orderHistory/${ratingReviewData.orderId}/review`, payload);
+   const users=(ratingReviewData.user).toLowerCase().trim();
+   console.log("this is user inside button",users);
+   const postReview= await postApi(`/orderHistory/${users}/${ratingReviewData.orderId}`, payload);
 
    if(postReview.success){
     toast.success(postReview.message);
@@ -129,7 +130,7 @@ export default function RateReviewModal({
           placeholder="Share your experience with this transaction..."
           value={review}
           onChange={(e) => setReview(e.target.value)}
-          className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200 resize-none mb-6"
+          className="w-full border border-gray-300 rounded-xl text-black px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200 resize-none mb-6"
           rows={4}
         />
 

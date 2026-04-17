@@ -3,16 +3,27 @@ import { useState } from "react";
 import LoginModal from "../auth/LoginModal";
 import SignupModal from "../auth/SignupModal";
 import Link from "next/link";
-import { getApi } from "@/services/apiService";
+import Logo from "@/SVG/Dashboard/KisanSetuLogo.svg";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { RxCross2 } from "react-icons/rx";
+import Image from "next/image";
 
-import { headFont } from "@/app/layout";
-import { useEffect } from "react";
+export default function Navbar({
+  togggleLogin,
+  openLogin,
+  openSignup,
+  toggleSignup,
+  closeMobileMenu,
+  toggleMobileMenu,
+  mobileMenu,
+   openLoginCloseSignup,
+          openSignupCloseLogin,
+           onCloseLogin,
+         onCloseSignup
 
-export default function Navbar() {
-  const [openLogin, setopenLogin] = useState(false);
-  const [openSignup, setopenSignup] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
-
+}) {
+  // const [openLogin, setopenLogin] = useState(false);
+  
 
   // useEffect(()=>{
   //   async function fetchData(){
@@ -20,77 +31,135 @@ export default function Navbar() {
   //   }
   // })
 
+  console.log("This is mobile menu:", mobileMenu);
+
   return (
     <>
-      <header className="bg-yellow-300 shadow w-full">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-8 py-3">
-
+      <header className="w-full z-20 absolute flex items-center justify-between mt-2 px-4 md:px-12 md:py-9 py-3">
+        {/* <div className="max-w-[98%]  flex items-center px-4 md:px-10 md:py-7 py-3"> */}
+        <div>
           {/* LOGO */}
           <h1 className="text-2xl ">
-            <span className={`text-black cursor-pointer ${headFont.className}`}>Kisan</span>{" "}
-            <span className={`text-lime-600 cursor-pointer ${headFont.className}`}>Setu</span>
+            {/* <span className={`text-black cursor-pointer ${headFont.className}`}>Kisan</span>{" "}
+            <span className={`text-lime-600 cursor-pointer ${headFont.className}`}>Setu</span> */}
+            <Image
+              src={Logo}
+              alt="KisanSetu"
+              className="h-[32px] sm:h-[38px] lg:h-[44px] w-auto object-contain"
+            />
           </h1>
-
+        </div>
+        <div>
           {/* DESKTOP MENU */}
           <nav className="hidden md:flex gap-8 text-black font-sm items-center">
-            <Link href="/" className="hover:text-lime-600">Home</Link>
-            <Link href="/features" className="hover:text-lime-600">Features</Link>
-            <Link href="/marketRates" className="hover:text-lime-600">Market Rates</Link>
-            <Link href="/schemes" className="hover:text-lime-600">Schemes</Link>
+            <Link href="/" className="hover:text-lime-600">
+              Home
+            </Link>
+            <Link href="/features" className="hover:text-lime-600">
+              Features
+            </Link>
+            <Link href="/marketRates" className="hover:text-lime-600">
+              Market Rates
+            </Link>
+            <Link href="/schemes" className="hover:text-lime-600">
+              Schemes
+            </Link>
           </nav>
-
-          {/* RIGHT BUTTONS (desktop) */}
-          <div className="hidden md:flex gap-4">
-            <button
-              className="bg-lime-500 text-white px-5 py-2 rounded-lg cursor-pointer"
-              onClick={() => setopenLogin(true)}
-            >
-              Login
-            </button>
-            <button
-              className="bg-white px-5 py-2 rounded-lg text-black cursor-pointer"
-              onClick={() => setopenSignup(true)}
-            >
-              Sign Up
-            </button>
-          </div>
-
-          {/* MOBILE HAMBURGER */}
-          <div className="md:hidden">
-            <button onClick={() => setMobileMenu(!mobileMenu)} className="text-2xl">
-              ☰
-            </button>
-          </div>
         </div>
+
+        {/* RIGHT BUTTONS (desktop) */}
+        <div className="hidden md:flex gap-4">
+          <button
+            className="bg-lime-500 text-white px-5 py-2 rounded-lg cursor-pointer"
+            onClick={() => togggleLogin()}
+          >
+            Login
+          </button>
+          <button
+            className="bg-white px-5 py-2 rounded-lg text-black cursor-pointer"
+            onClick={() => toggleSignup()}
+          >
+            Sign Up
+          </button>
+        </div>
+
+        {/* MOBILE HAMBURGER */}
+        <div className="md:hidden">
+          <button
+            onClick={() => toggleMobileMenu()}
+            className="w-8 h-8 flex items-center justify-center"
+            aria-label={mobileMenu ? "Close menu" : "Open menu"}
+          >
+            {mobileMenu ? (
+              <span className="flex items-center justify-center">
+                <RxCross2 className="bg-gray-300 w-7 h-7 rounded-md text-black p-1" />
+              </span>
+            ) : (
+              <span className="flex items-center justify-center">
+                <GiHamburgerMenu className="bg-gray-300 w-7 h-7 rounded-md text-black p-1" />
+              </span>
+            )}
+          </button>
+        </div>
+        {/* </div> */}
 
         {/* MOBILE MENU */}
         {mobileMenu && (
-          <div className="md:hidden bg-yellow-300 px-4 py-4 space-y-3 flex flex-col text-black">
-            <Link href="/">Home</Link>
-            <Link href="/features">Features</Link>
-            <Link href="/marketRates">Market Rates</Link>
-            <Link href="/schemes">Scheme</Link>
+        <div
+  className={`md:hidden absolute w-[92%] left-1/2 -translate-x-1/2 top-full
+  transition-all duration-800 ease-out
+  ${
+    mobileMenu
+      ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+      : "opacity-0 -translate-y-4 scale-95 pointer-events-none"
+  }`}
+>
+  <div className="mt-2 bg-white w-full px-4 py-4 space-y-3 flex flex-col text-black rounded shadow-md">
+    
+    <Link href="/" onClick={() => toggleMobileMenu()}>
+      Home
+    </Link>
 
-            <button
-              className="bg-lime-500 text-white px-5 py-2 rounded-lg mt-2 
-              "
-              onClick={() => setopenLogin(true)}
-            >
-              Login
-            </button>
-            <button
-              className="bg-white px-5 py-2 rounded-lg text-black 
-              "
-              onClick={() => setopenSignup(true)}
-            >
-              Sign Up
-            </button>
-          </div>
+    <Link href="/features" onClick={() => toggleMobileMenu()}>
+      Features
+    </Link>
+
+    <Link href="/marketRates" onClick={() => toggleMobileMenu()}>
+      Market Rates
+    </Link>
+
+    <Link href="/schemes" onClick={() => toggleMobileMenu()}>
+      Scheme
+    </Link>
+
+  </div>
+</div>
+
+         
+         
         )}
       </header>
 
-      {openLogin && <LoginModal onClose={() => setopenLogin(false)} openSignup={()=>setopenSignup(true)}  />}
-      {openSignup && <SignupModal onClose={() => setopenSignup(false)} openLogin={()=>setopenLogin(true)}   />}
+      {openLogin && (
+        <LoginModal
+          // openSignup={() => setopenSignup(true)}
+          toggleLogin={() => togggleLogin()}
+          openSignupCloseLogin={openSignupCloseLogin}
+            openLogin={openLogin}
+             onCloseLogin={onCloseLogin}
+      
+ 
+        />
+      )}
+      {openSignup && (
+        <SignupModal
+          // onClose={() => setopenSignup(false)}
+          toggleSignup={toggleSignup}
+           openLoginCloseSignup={openLoginCloseSignup}
+            openSignup={openSignup}  
+         onCloseSignup={onCloseSignup}
+        />
+      )}
     </>
   );
 }
