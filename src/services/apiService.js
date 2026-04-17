@@ -29,6 +29,15 @@ import { handleApi } from "@/lib/apiHndler";
 export const getApi = (url, config = {}) =>
   handleApi(() => api.get(url, config));
 
+//With blob
+export const blobGetApi = (url, config = {}) =>
+  handleApi(() =>
+    api.get(url, {
+      ...config,
+      responseType: "blob", 
+    })
+  );
+
 //  POST JSON 
 export const postApi = (url, data = {}, config = {}) =>
   handleApi(() =>
@@ -48,7 +57,7 @@ export const postMultipartApi = (url, formData, config = {}) =>
   );
 
 //  PUT 
-export const putApi = (url, data , config = {}) =>
+export const putMultipartApi = (url, data , config = {}) =>
   handleApi(() => api.put(url, data, {
       headers: { "Content-Type": "multipart/form-data" },
       ...config,
@@ -57,3 +66,10 @@ export const putApi = (url, data , config = {}) =>
 //  DELETE 
 export const deleteApi = (url, config = {}) =>
   handleApi(() => api.delete(url, config));
+
+//  PUT 
+export const putApi = (url, data , config = {}) =>
+  handleApi(() => api.put(url, data, {
+      headers: { "Content-Type": "application/json" },
+      ...config,
+    }));

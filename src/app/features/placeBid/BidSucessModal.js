@@ -5,8 +5,8 @@ export default function BidSuccessModal({ open, onClose,totalPrice,Onclose}) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-white w-[520px] rounded-2xl shadow-xl p-8 text-center">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50">
+      <div className="bg-white   rounded-2xl max-w-100 md:max-w-120  shadow-xl p-8 text-center">
 
         {/* Success Icon */}
         <div className="flex justify-center mb-5">

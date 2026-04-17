@@ -14,7 +14,7 @@ export default function NotificationDropdown() {
   const [notifications,setnotifications]=useState();
   const [selectedListData,setselectedListData]=useState();
   const [escrowModal,setEscrowModal]=useState(false);
-  const [notificationRefreshKey,setnotificationRefreshKey]=useState(0);
+  const [notificationRefreshKey,confirmPaymentRefreshKey]=useState(0);
 
   useEffect(()=>{
     const fetchData=async()=>{
@@ -38,7 +38,7 @@ console.log(notifications);
   const rejectApi =await postApi(`orders/${listingId}/reject`);
    if(rejectApi.success){
     console.log("hello rejected");
-    setnotificationRefreshKey(notificationRefreshKey+1);
+    confirmPaymentRefreshKey(notificationRefreshKey+1);
    }
   }
 
@@ -166,7 +166,7 @@ console.log(notifications);
         </div>
     
         {
-          escrowModal && <EscrowPayment setEscrowModal={setEscrowModal} setnotificationRefreshKey={()=>setnotificationRefreshKey(notificationRefreshKey+1)} selectedListData={selectedListData} onClose={()=>setEscrowModal(false)} />
+          escrowModal && <EscrowPayment setEscrowModal={setEscrowModal} confirmPaymentRefreshKey={()=>confirmPaymentRefreshKey(notificationRefreshKey+1)} selectedListData={selectedListData} onClose={()=>setEscrowModal(false)} />
         }
     </div>
   );

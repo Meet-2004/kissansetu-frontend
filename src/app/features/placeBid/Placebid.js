@@ -198,27 +198,38 @@ export default function Placebid({ Onclose, selectedList }) {
 
         </div>
       </div> */
-  }
 
-  return (
-    <>
+
+      return (
+  <>
     <Toast times={4000} />
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-6">
-      <div className="bg-white min-w-200 max-w-350 rounded-xl shadow-xl p-6 overflow-y-auto max-h-[90vh]">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+
+    {/* Overlay */}
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-3 sm:p-6">
+      
+      {/* Modal */}
+      <div className="bg-white w-full max-w-6xl rounded-xl shadow-xl p-4 sm:p-6 pb-28 overflow-y-auto max-h-[92.5vh] text-black">
+        
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          
           <div>
-            <h2 className="text-xl font-semibold text_black">Live Auction</h2>
-            <p className="text-gray-500 text-sm">Whole Lot Auction Mode</p>
+            <h2 className="text-lg sm:text-xl font-semibold text-black">
+              Live Auction
+            </h2>
+            <p className="text-gray-500 text-xs sm:text-sm">
+              Whole Lot Auction Mode
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="bg-green-100 text_lime px-4 py-1 rounded-full text-sm">
+          <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+            <span className="bg-green-100 text_lime px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
               Auction Active
             </span>
+
             <button
               onClick={Onclose}
-              className="text-xl text_black cursor-pointer h-7"
+              className="text-lg sm:text-3xl sm:absolute text-black"
             >
               ✕
             </button>
@@ -226,306 +237,549 @@ export default function Placebid({ Onclose, selectedList }) {
         </div>
 
         {oneListData && oneListData.length > 0 ? (
-          oneListData.map((item, index) => {
-            return (
-              <>
-                {/* LEFT SECTION */}
-                <div className="grid grid-cols-3 gap-6" key={item.listingId}>
-                  <div className="col-span-2 space-y-6">
-                    <div className="border rounded-xl p-6 flex gap-6 items-start  border-gray-500">
-                      {/* Crop Image */}
-                      <div className="w-40 h-32 relative rounded-lg overflow-hidden">
-                        <Image
-                          src={getImageUrls(item.images[0].filePath)}
-                          alt="Premium Wheat"
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      </div>
+          oneListData.map((item) => (
+            <div key={item.listingId} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* LEFT SECTION */}
+              <div className="lg:col-span-2 space-y-6">
 
-                      {/* Crop Details */}
-                      <div className="flex-1">
-                        {/* Title Row */}
-                        <div className="flex justify-between items-start mb-2">
-                          <h2 className="text-xl font-semibold text_black">
-                            {item.cropName}
-                          </h2>
-
-                          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md text-sm">
-                            <Star
-                              size={16}
-                              className="text-yellow-500 fill-yellow-400 "
-                            />
-                            <p className="text-black"> 4.8</p>
-                          </div>
-                        </div>
-
-                        {/* Variety + Grade */}
-                        <p className="text-sm text-gray-600">
-                          Variety:
-                          <span className="text_lime font-medium">
-                            {item.variety}
-                          </span>
-                        </p>
-
-                        <p className="text-sm text-gray-600 mb-3">
-                          Grade:{" "}
-                          <span className="font-medium">{item.grade}</span>
-                        </p>
-
-                        {/* Grid Info */}
-                        <div className="grid grid-cols-2 gap-x-10 gap-y-3 text-sm">
-                          <div>
-                            <p className="text-gray-500">Total Quantity</p>
-                            <p className="font-semibold text_black">
-                              {item.quantity} {item.unit}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-gray-500 flex items-center gap-1">
-                              Location
-                            </p>
-                            <p className="font-semibold flex gap-1 text_black  ">
-                              {" "}
-                              <p className="flex items-center">
-                                <MapPin size={14} />
-                              </p>{" "}
-                              <p className="text-md">
-                                {item.district} {item.state}
-                              </p>
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-gray-500 flex items-center gap-1">
-                              <Package size={14} /> Packaging
-                            </p>
-                            <p className="font-semibold text_black">
-                              {item.packagingType}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-gray-500">Storage</p>
-                            <p className="font-semibold text_black">
-                              {item.storageType}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-gray-500 flex items-center gap-1">
-                              <Calendar size={14} /> Harvest Date
-                            </p>
-                            <p className="font-semibold text_black">
-                              {item.harvestDate[2]}-{item.harvestDate[1]}-
-                              {item.harvestDate[0]}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Highest Bid */}
-                    <div className="border border-gray-500 rounded-lg p-6">
-                      <div>
-                        <p className="text_black">Auction Information</p>
-                        <div className="mt-2 grid grid-cols-3">
-                          <div>
-                            <p className="text_black">Base Price (per kg)</p>
-                            <p className="text_black">₹{item.pricePerKg}</p>
-                          </div>
-                          <div>
-                            <p className="text_black">Minimum Bid Increment</p>
-                            <p className="text_lime">
-                              ₹{item.minimumBidIncrement}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text_black">Total Lot Value (Base)</p>
-                            <p className="text_black">₹{item.basePrice}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-6 flex justify-between items-center mt-5">
-                        <div>
-                          <p className="text-gray-500 text-sm">
-                            Current Highest Bid
-                          </p>
-                          <h2 className="text-3xl font-bold text_lime">
-                            ₹{item.currentHighestBid}
-                          </h2>
-                          {/* <p className="text-sm text-gray-500">Total: ₹1,250,000</p> */}
-                        </div>
-
-                        <TrendingUp className="text_lime" size={32} />
-                      </div>
-
-                      {/* Timer */}
-                      <div className="text-center space-y-2 mt-5">
-                        <p className="text-gray-500">Auction Ends In</p>
-
-                        <div className="inline-flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-lg text-lg font-semibold">
-                          <Clock size={18} />
-                          {timeLeft}
-                        </div>
-
-                        <p className="text-orange-500 text-sm">
-                          If a bid is placed in the last 2 minutes, the auction
-                          extends automatically.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bid Activity */}
-                    <div className="border rounded-lg  border-gray-500">
-                      <div className="p-4 border-b font-semibold text_black">
-                        Bid Activity
-                      </div>
-
-                      {bidList && bidList.length > 0 ? (
-                        <table className="w-full text-sm" key={index}>
-                          <thead className="text-gray-500 border-b">
-                            <tr className="">
-                              <th className="text-left p-3 ">Bidder</th>
-                              <th className="text-left p-3">
-                                Bid Amount (per kg)
-                              </th>
-                              <th className="text-left p-3">Time Placed</th>
-                              <th className="text-left p-3">Status</th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {bidList?.map((bid, index) => {
-                              return (
-                                <tr
-                                  className=" text_black border-t border-black"
-                                  key={index}
-                                >
-                                  <td className="p-3  ">{bid.bidderName}</td>
-                                  <td className="p-3  ">₹{bid.buyerAmount}</td>
-                                  {/* <td className="p-3" >{getTime([bid.bidTime])}{timeLeftbid}</td> */}
-                                  <td className="flex gap-2.justify-center py-2 gap-5">
-                                    {bid.bidHistoryStatus}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      ) : (
-                        <div className="text-center w-full text-black px-5 py-5">
-                          There is no bid placed yet
-                        </div>
-                      )}
-
-                      {/* <div className="text_lime text-sm p-4">View Full History</div> */}
-                    </div>
+                {/* PRODUCT CARD */}
+                <div className="border rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 border-gray-300">
+                  
+                  <div className="w-full sm:w-40 h-40 sm:h-32 relative rounded-lg overflow-hidden">
+                    <Image
+                      src={getImageUrls(item.images[0].filePath)}
+                      alt="crop"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
                   </div>
 
-                  {/* RIGHT SECTION */}
-                  <div className=" rounded-lg p-6 space-y-5 h-fit border-2 border-lime-500">
-                    <h3 className="font-semibold text-lg text_black">
-                      Place Your Bid
-                    </h3>
-
-                    {/* Current Bid */}
-                    <div className="bg-gray-100 rounded-lg p-4">
-                      <p className="text-gray-500 text-sm">
-                        Current Highest Bid
-                      </p>
-                      <h2 className="text-2xl font-bold text_black">
-                        ₹{item.currentHighestBid}
+                  <div className="flex-1">
+                    
+                    <div className="flex justify-between items-start mb-2">
+                      <h2 className="text-lg sm:text-xl font-semibold text-black">
+                        {item.cropName}
                       </h2>
-                      <p className="text-sm text-gray-500"></p>
+
+                      <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md text-xs sm:text-sm">
+                        <Star size={14} className="text-yellow-500 fill-yellow-400" />
+                        <p className="text-black">4.8</p>
+                      </div>
                     </div>
 
-                    {/* Minimum Bid */}
-                    <div>
-                      <p className="text-sm text-gray-500">Minimum Next Bid</p>
-                      <p className="text_lime font-semibold text-lg">
-                        ₹{item.currentHighestBid + item.minimumBidIncrement}
-                      </p>
-                    </div>
+                    <p className="text-gray-600 text-xs sm:text-sm">
+                      Variety: <span className="text_lime font-medium">{item.variety}</span>
+                    </p>
 
-                    {/* Input */}
-                    <div>
-                      <label className="text-sm text-gray-500 ">
-                        Enter Bid Amount (per kg)
-                      </label>
+                    <p className="text-gray-600 text-xs sm:text-sm mb-3">
+                      Grade: <span className="font-medium">{item.grade}</span>
+                    </p>
 
-                      <input
-                        type="text"
-                        placeholder={`Minimum Amount ${item.currentHighestBid + item.minimumBidIncrement}`}
-                        value={bidData.buyerAmount}
-                        onChange={handleChange}
-                        name="buyerAmount"
-                        className="w-full mt-1 border rounded-lg p-2 text_black"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                      
+                      <div>
+                        <p className="text-gray-500">Quantity</p>
+                        <p className="font-semibold text-black">
+                          {item.quantity} {item.unit}
+                        </p>
+                      </div>
 
-                      <p className="text-xs text-gray-500 mt-1">
-                        Your bid must be at least ₹{item.minimumBidIncrement} higher than the current
-                        highest bid.
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-gray-500">Location</p>
+                        <p className="font-semibold flex items-center gap-1 text-black">
+                          <MapPin size={14} />
+                          {item.district} {item.state}
+                        </p>
+                      </div>
 
-                    {/* Escrow */}
-                    <div className="flex items-center gap-2 text-sm text_black">
-                      <input type="checkbox" />
-                      Escrow Protection Enabled
-                    </div>
+                      <div>
+                        <p className="text-gray-500">Packaging</p>
+                        <p className="font-semibold text-black">
+                          {item.packagingType}
+                        </p>
+                      </div>
 
-                    {/* Buttons */}
+                      <div>
+                        <p className="text-gray-500">Storage</p>
+                        <p className="font-semibold text-black">
+                          {item.storageType}
+                        </p>
+                      </div>
 
-                    <button
-                      className="w-full bg-lime-500  text-white py-3 rounded-lg font-semibold  cursor-pointer  flex justify-center items-center hover:bg-lime-600"
-                      onClick={() => setopenConfirm(true)}
-                    >
-                      Place Bid
-                    </button>
-
-                    {openConfirm && (
-                      <ConfirmBidModal
-                        open={openConfirm}
-                        onClose={() => setopenConfirm(false)}
-                        onConfirm={() => {
-                          handleSubmit();
-                          // setopenConfirm(false);
-                        }}
-                        cropName={selectedList.cropName}
-                        pricePerKg={selectedList.pricePerKg}
-                        totalPrice={bidData.buyerAmount}
-                      />
-                    )}
-              {bidSucessModal && (
-            <BidSuccessModal
-              open={bidSucessModal}
-              onClose={() => setbidSucessModal(false)}
-              totalPrice={bidData.buyerAmount}
-              Onclose={Onclose}
-             
-            />
-          )}
-
-                    <button className="w-full border border-green-600 text_lime py-3 rounded-lg font-semibold cursor-pointer">
-                      Set Auto Bid
-                    </button>
-
-                    <div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded">
-                      [Demo: Change Status] This is a demonstration interface.
+                      <div>
+                        <p className="text-gray-500">Harvest Date</p>
+                        <p className="font-semibold text-black">
+                          {item.harvestDate[2]}-{item.harvestDate[1]}-{item.harvestDate[0]}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </>
-            );
-          })
+
+                {/* AUCTION INFO */}
+                <div className="border rounded-lg p-4 sm:p-6 space-y-4 border-gray-300">
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+                    <div>
+                      <p className="text-black">Base Price</p>
+                      <p className="text-black">₹{item.pricePerKg}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-black">Min Increment</p>
+                      <p className="text_lime">₹{item.minimumBidIncrement}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-black">Total Value</p>
+                      <p className="text-black">₹{item.basePrice}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 rounded-lg p-4 flex justify-between items-center">
+                    <div>
+                      <p className="text-gray-500 text-xs">Highest Bid</p>
+                      <h2 className="text-xl sm:text-2xl font-bold text_lime">
+                        ₹{item.currentHighestBid}
+                      </h2>
+                    </div>
+                    <TrendingUp size={24} className="text_lime" />
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-gray-500 text-xs">Ends In</p>
+                    <div className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg text-sm">
+                      <Clock size={16} />
+                      {timeLeft}
+                    </div>
+                  </div>
+                </div>
+
+                {/* BID TABLE */}
+                <div className="border rounded-lg overflow-x-auto border-gray-300">
+                  
+                  {bidList && bidList.length > 0 ? (
+                    <table className="w-full min-w-[500px] text-xs sm:text-sm text-black">
+                      <thead className="border-b text-gray-500">
+                        <tr>
+                          <th className="p-2 text-left">Bidder</th>
+                          <th className="p-2 text-left">Amount</th>
+                          <th className="p-2 text-left">Status</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {bidList.map((bid, i) => (
+                          <tr key={i} className="border-t text-black">
+                            <td className="p-2">{bid.bidderName}</td>
+                            <td className="p-2">₹{bid.buyerAmount}</td>
+                            <td className="p-2">{bid.bidHistoryStatus}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center py-4 text-black">
+                      No bids placed yet
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RIGHT SECTION (ONLY HIDDEN ON MOBILE) */}
+              <div className="hidden lg:block border rounded-lg p-4 sm:p-6 space-y-4 h-fit border-lime-400">
+                
+                <h3 className="font-semibold text-base sm:text-lg text-black">
+                  Place Your Bid
+                </h3>
+
+                <div className="bg-gray-100 p-3 rounded">
+                  <p className="text-gray-500 text-xs">Current Bid</p>
+                  <h2 className="text-lg font-bold text-black">
+                    ₹{item.currentHighestBid}
+                  </h2>
+                </div>
+
+                <div>
+                  <p className="text-gray-500 text-sm">Minimum Next Bid</p>
+                  <p className="text_lime font-semibold text-lg">
+                    ₹{item.currentHighestBid + item.minimumBidIncrement}
+                  </p>
+                </div>
+
+                {/*  SAME INPUT (NO CHANGE) */}
+                <input
+                  type="text"
+                  placeholder={`Minimum ${item.currentHighestBid + item.minimumBidIncrement}`}
+                  value={bidData.buyerAmount}
+                  onChange={handleChange}
+                  name="buyerAmount"
+                  className="w-full border p-2 rounded text-sm text-black"
+                />
+
+                <button
+                  className="w-full bg-lime-500 text-white py-2 rounded hover:bg-lime-600"
+                  onClick={() => setopenConfirm(true)}
+                >
+                  Place Bid
+                </button>
+
+              
+
+                <button className="w-full border border-green-600 text_lime py-2 rounded">
+                  Set Auto Bid
+                </button>
+
+                <div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded">
+                  [Demo] This is a demo interface
+                </div>
+              </div>
+            </div>
+          ))
         ) : (
-          <div>no details available yet</div>
+          <div className="text-center py-6 text-black">
+            No details available
+          </div>
         )}
       </div>
+
+      {/* MOBILE STICKY BID BAR (NO LOGIC CHANGE) */}
+      {oneListData && oneListData.length > 0 && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 z-50">
+          
+          <div className="flex flex-col gap-2">
+            
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-gray-500">Current Bid</p>
+              <p className="text-lg font-bold text_lime">
+                ₹{oneListData[0].currentHighestBid}
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              {/* 🔴 SAME INPUT + SAME STATE */}
+              <input
+                type="text"
+                placeholder={`Minimum ${oneListData[0].currentHighestBid + oneListData[0].minimumBidIncrement}`}
+                value={bidData.buyerAmount}
+                onChange={handleChange}
+                name="buyerAmount"
+                className="w-[65%] border rounded-lg px-3 py-2 text-sm text-black"
+              />
+
+              <button
+                className="bg-lime-500 w-[35%] text-white px-4 py-2 rounded-lg font-semibold hover:bg-lime-600"
+                onClick={() => setopenConfirm(true)}
+              >
+                Place Bid
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+        {/* 🔴 SAME MODALS */}
+                {openConfirm && (
+                  <ConfirmBidModal
+                    open={openConfirm}
+                    onClose={() => setopenConfirm(false)}
+                    onConfirm={() => handleSubmit()}
+                    cropName={selectedList.cropName}
+                    pricePerKg={selectedList.pricePerKg}
+                    totalPrice={bidData.buyerAmount}
+                  />
+                )}
+
+                {bidSucessModal && (
+                  <BidSuccessModal
+                    open={bidSucessModal}
+                    onClose={() => setbidSucessModal(false)}
+                    totalPrice={bidData.buyerAmount}
+                    Onclose={Onclose}
+                  />
+                )}
     </div>
-    </>
-  );
+  </>
+);
+  }
+
+//  
 }
+
+
+
+//  return (
+//   <>
+//     <Toast times={4000} />
+
+//     {/* Overlay */}
+//     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-3 sm:p-6">
+      
+//       {/* Modal */}
+//       <div className="bg-white w-full max-w-6xl rounded-xl shadow-xl p-4 sm:p-6 overflow-y-auto max-h-[90vh] text-black">
+        
+//         {/* HEADER */}
+//         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          
+//           {/* LEFT */}
+//           <div>
+//             <h2 className="text-lg sm:text-xl font-semibold text-black">
+//               Live Auction
+//             </h2>
+//             <p className="text-gray-500 text-xs sm:text-sm">
+//               Whole Lot Auction Mode
+//             </p>
+//           </div>
+
+//           {/* RIGHT */}
+//           <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+//             <span className="bg-green-100 text_lime px-3 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+//               Auction Active
+//             </span>
+
+//             <button
+//               onClick={Onclose}
+//               className="text-lg sm:text-xl text-black"
+//             >
+//               ✕
+//             </button>
+//           </div>
+//         </div>
+
+//         {oneListData && oneListData.length > 0 ? (
+//           oneListData.map((item) => (
+//             <div key={item.listingId} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+//               {/* LEFT SECTION */}
+//               <div className="lg:col-span-2 space-y-6">
+
+//                 {/* PRODUCT CARD */}
+//                 <div className="border rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 border-gray-300">
+                  
+//                   {/* IMAGE */}
+//                   <div className="w-full sm:w-40 h-40 sm:h-32 relative rounded-lg overflow-hidden">
+//                     <Image
+//                       src={getImageUrls(item.images[0].filePath)}
+//                       alt="crop"
+//                       fill
+//                       className="object-cover"
+//                       unoptimized
+//                     />
+//                   </div>
+
+//                   {/* DETAILS */}
+//                   <div className="flex-1">
+                    
+//                     <div className="flex justify-between items-start mb-2">
+//                       <h2 className="text-lg sm:text-xl font-semibold text-black">
+//                         {item.cropName}
+//                       </h2>
+
+//                       <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-md text-xs sm:text-sm">
+//                         <Star size={14} className="text-yellow-500 fill-yellow-400" />
+//                         <p className="text-black">4.8</p>
+//                       </div>
+//                     </div>
+
+//                     <p className="text-gray-600 text-xs sm:text-sm">
+//                       Variety: <span className="text_lime font-medium">{item.variety}</span>
+//                     </p>
+
+//                     <p className="text-gray-600 text-xs sm:text-sm mb-3">
+//                       Grade: <span className="font-medium">{item.grade}</span>
+//                     </p>
+
+//                     {/* INFO GRID */}
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                      
+//                       <div>
+//                         <p className="text-gray-500">Quantity</p>
+//                         <p className="font-semibold text-black">
+//                           {item.quantity} {item.unit}
+//                         </p>
+//                       </div>
+
+//                       <div>
+//                         <p className="text-gray-500">Location</p>
+//                         <p className="font-semibold flex items-center gap-1 text-black">
+//                           <MapPin size={14} />
+//                           {item.district}, {item.state}
+//                         </p>
+//                       </div>
+
+//                       <div>
+//                         <p className="text-gray-500">Packaging</p>
+//                         <p className="font-semibold text-black">
+//                           {item.packagingType}
+//                         </p>
+//                       </div>
+
+//                       <div>
+//                         <p className="text-gray-500">Storage</p>
+//                         <p className="font-semibold text-black">
+//                           {item.storageType}
+//                         </p>
+//                       </div>
+
+//                       <div>
+//                         <p className="text-gray-500">Harvest Date</p>
+//                         <p className="font-semibold text-black">
+//                           {item.harvestDate[2]}-{item.harvestDate[1]}-{item.harvestDate[0]}
+//                         </p>
+//                       </div>
+
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* AUCTION INFO */}
+//                 <div className="border rounded-lg p-4 sm:p-6 space-y-4 border-gray-300">
+                  
+//                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+//                     <div>
+//                       <p className="text-black">Base Price</p>
+//                       <p className="text-black">₹{item.pricePerKg}</p>
+//                     </div>
+
+//                     <div>
+//                       <p className="text-black">Min Increment</p>
+//                       <p className="text_lime">₹{item.minimumBidIncrement}</p>
+//                     </div>
+
+//                     <div>
+//                       <p className="text-black">Total Value</p>
+//                       <p className="text-black">₹{item.basePrice}</p>
+//                     </div>
+//                   </div>
+
+//                   {/* CURRENT BID */}
+//                   <div className="bg-green-50 rounded-lg p-4 flex justify-between items-center">
+//                     <div>
+//                       <p className="text-gray-500 text-xs">Highest Bid</p>
+//                       <h2 className="text-xl sm:text-2xl font-bold text_lime">
+//                         ₹{item.currentHighestBid}
+//                       </h2>
+//                     </div>
+//                     <TrendingUp size={24} className="text_lime" />
+//                   </div>
+
+//                   {/* TIMER */}
+//                   <div className="text-center">
+//                     <p className="text-gray-500 text-xs">Ends In</p>
+//                     <div className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg text-sm">
+//                       <Clock size={16} />
+//                       {timeLeft}
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 {/* BID TABLE */}
+//                 <div className="border rounded-lg overflow-x-auto border-gray-300">
+                  
+//                   {bidList && bidList.length > 0 ? (
+//                     <table className="w-full min-w-[500px] text-xs sm:text-sm text-black">
+                      
+//                       <thead className="border-b text-gray-500">
+//                         <tr>
+//                           <th className="p-2 text-left">Bidder</th>
+//                           <th className="p-2 text-left">Amount</th>
+//                           <th className="p-2 text-left">Status</th>
+//                         </tr>
+//                       </thead>
+
+//                       <tbody>
+//                         {bidList.map((bid, i) => (
+//                           <tr key={i} className="border-t text-black">
+//                             <td className="p-2">{bid.bidderName}</td>
+//                             <td className="p-2">₹{bid.buyerAmount}</td>
+//                             <td className="p-2">{bid.bidHistoryStatus}</td>
+//                           </tr>
+//                         ))}
+//                       </tbody>
+
+//                     </table>
+//                   ) : (
+//                     <div className="text-center py-4 text-black">
+//                       No bids placed yet
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+
+//               {/* RIGHT SECTION */}
+//               <div className="border rounded-lg p-4 sm:p-6 space-y-4 h-fit border-lime-400">
+                
+//                 <h3 className="font-semibold text-base sm:text-lg text-black">
+//                   Place Your Bid
+//                 </h3>
+
+//                 <div className="bg-gray-100 p-3 rounded">
+//                   <p className="text-gray-500 text-xs">Current Bid</p>
+//                   <h2 className="text-lg font-bold text-black">
+//                     ₹{item.currentHighestBid}
+//                   </h2>
+//                 </div>
+
+//                 <div>
+//                   <p className="text-gray-500 text-sm">Minimum Next Bid</p>
+//                   <p className="text_lime font-semibold text-lg">
+//                     ₹{item.currentHighestBid + item.minimumBidIncrement}
+//                   </p>
+//                 </div>
+
+//                 <input
+//                   type="text"
+//                   placeholder={`Minimum ${item.currentHighestBid + item.minimumBidIncrement}`}
+//                   value={bidData.buyerAmount}
+//                   onChange={handleChange}
+//                   name="buyerAmount"
+//                   className="w-full border p-2 rounded text-sm text-black"
+//                 />
+
+//                 <button
+//                   className="w-full bg-lime-500 text-white py-2 rounded hover:bg-lime-600"
+//                   onClick={() => setopenConfirm(true)}
+//                 >
+//                   Place Bid
+//                 </button>
+
+//                 {openConfirm && (
+//                   <ConfirmBidModal
+//                     open={openConfirm}
+//                     onClose={() => setopenConfirm(false)}
+//                     onConfirm={() => handleSubmit()}
+//                     cropName={selectedList.cropName}
+//                     pricePerKg={selectedList.pricePerKg}
+//                     totalPrice={bidData.buyerAmount}
+//                   />
+//                 )}
+
+//                 {bidSucessModal && (
+//                   <BidSuccessModal
+//                     open={bidSucessModal}
+//                     onClose={() => setbidSucessModal(false)}
+//                     totalPrice={bidData.buyerAmount}
+//                     Onclose={Onclose}
+//                   />
+//                 )}
+
+//                 <button className="w-full border border-green-600 text_lime py-2 rounded">
+//                   Set Auto Bid
+//                 </button>
+
+//                 <div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded">
+//                   [Demo] This is a demo interface
+//                 </div>
+//               </div>
+//             </div>
+//           ))
+//         ) : (
+//           <div className="text-center py-6 text-black">
+//             No details available
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   </>
+// );

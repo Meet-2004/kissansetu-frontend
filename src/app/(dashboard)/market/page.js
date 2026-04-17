@@ -179,3 +179,6 @@
 //     </div>
 //   );
 // }
+export default function MarketPage() {
+  return null; // or simple UI
+}

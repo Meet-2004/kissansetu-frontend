@@ -1,200 +1,242 @@
 "use client";
-import { useEffect } from "react";
-import { Search, Paperclip, Smile, Mic, Send, Bell } from "lucide-react";
+
+import { useEffect, useRef, useState } from "react";
+import { Search, Paperclip, Smile, Mic, Send } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import useChatSocket from "@/app/features/chat socket/useChatSocket";
-import { useRef } from "react";
-import { useState } from "react";
+
+const getInitials = (name = "") => {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+
+  return initials || "?";
+};
+
+const formatMessageDate = (value) => {
+  if (!value) return "";
+
+  if (Array.isArray(value) && value.length >= 3) {
+    return `${value[2]}-${value[1]}-${value[0]}`;
+  }
+
+  if (typeof value === "string") {
+    return value.slice(0, 10);
+  }
+
+  return "";
+};
 
 export default function MessagesUI() {
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("conversationId");
+  const participantId = searchParams.get("participantId");
   const participantName = searchParams.get("participantName") || "";
-  const [message,setMessage]=useState("");
-    
+
+  const [message, setMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const messagesEndRef = useRef(null);
 
   const {
     sendMessage,
     chatUsers,
     messages,
     currentChat,
-    getCurrentChat,
+    currentUserId,
+    connectionStatus,
     loadConversation,
-    handleMessageClick,
-    connectWebSocket,
+    handleSidebarClick,
   } = useChatSocket();
 
   useEffect(() => {
     if (!conversationId) return;
-    loadConversation(conversationId, participantName);
-  }, [conversationId, loadConversation, participantName]);
 
-  useEffect(()=>{
-    const loggeduser=localStorage.getItem("persist:auth");
-    const loggeduserId=JSON.parse(loggeduser);
-    connectWebSocket(loggeduserId.id)
-  },[])
+    loadConversation(conversationId, participantName, participantId);
+  }, [conversationId, loadConversation, participantId, participantName]);
 
-  const displayName = currentChat?.participant_name || participantName || "Unknown User";
-  const userId=currentChat?.owner_id || conversationId || " unknown id";
-  console.log("this is current chat id ",userId);
-  // const userId = getCurrentChat()?.id || conversationId;
-  console.log("this is current chat ",currentChat);
-  const displayInitials = displayName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "?";
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  console.log("Chat Users:", chatUsers);
-  console.log("Messages:", messages);
-  console.log("Current Chat:", currentChat);
-  console.log("handleMessageClick:", handleMessageClick);
-  console.log("sendMessage:", sendMessage);
-  console.log("getCurrentChat():", getCurrentChat()); // Call the function, not the ref
+  const filteredChatUsers = chatUsers.filter((chat) => {
+    const name = chat?.participant_name || chat?.name || "";
+    return name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
+  const displayName = currentChat?.participant_name || participantName || "Select a chat";
+  const displayInitials = getInitials(displayName);
+  const hasSelectedChat = Boolean(currentChat?.id);
 
- const handleMessage=async  ()=>{
-      const sent = await sendMessage(userId,message); 
-      if(sent){
-        setMessage("");
-      }
+  const handleSendMessage = () => {
+    const sent = sendMessage(message);
+    if (sent) {
+      setMessage("");
     }
-  //  getCurrentChat();
+  };
 
-
-  
-
+  const handleInputKeyDown = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   return (
-    <div className="flex overflow-y-hidden bg-gray-100 min-h-[17.5cm] max-h-[17.6cm]">
-
-      {/* LEFT SIDEBAR */}
-      <div className="w-[320px] bg-white border-r flex flex-col overflow-hidden ">
-
-        {/* Header */}
-        {/* <div className="p-4 font-semibold text-lg border-b">
-          Messages
-        </div> */}
-
-        {/* Search */}
-        <div className="p-3 border-b">
-          <div className="flex items-center bg-gray-100 px-3 py-2 rounded-lg">
-            <Search size={16} className="text-gray-400"/>
+    <div className="flex min-h-screen max-h-screen flex-col overflow-hidden bg-gray-100 lg:flex-row">
+      <div className="flex w-full flex-col border-r bg-white lg:w-[340px]">
+        <div className="border-b p-3">
+          <div className="flex items-center rounded-lg bg-gray-100 px-3 py-2">
+            <Search size={16} className="text-gray-400" />
             <input
-              className="bg-transparent outline-none ml-2 text-sm w-full text-gray-700"
+              className="ml-2 w-full bg-transparent text-sm text-gray-700 outline-none"
               placeholder="Search messages..."
-              
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
         </div>
 
-        {/* Chat List */}
-        <div className="flex-1 overflow-y-scroll">
+        <div className="flex-1 overflow-y-auto">
+          {filteredChatUsers.length > 0 ? (
+            filteredChatUsers.map((chat) => {
+              const chatName = chat?.participant_name || chat?.name || "Unknown User";
+              const chatConversationId = chat?.conversation_id || chat?.id;
+              const isActive =
+                hasSelectedChat && String(chatConversationId) === String(currentChat?.id);
 
-          {chatUsers && chatUsers.length > 0  && chatUsers.map((chat,i)=>(
-            <div key={i} className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer text-black" onClick={()=>{handleMessageClick(chat.user_id)}}>
+              return (
+                <button
+                  key={chatConversationId || chat?.participant_id || chat?.user_id || chatName}
+                  type="button"
+                  className={`flex w-full items-center px-4 py-3 text-left text-black transition ${
+                    isActive ? "bg-lime-50" : "hover:bg-gray-50"
+                  }`}
+                  onClick={() => handleSidebarClick(chat)}
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold">
+                    {getInitials(chatName)}
+                  </span>
 
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold">
-                {chat.name[0].toUpperCase()}
-              </div>
-
-              <div className="ml-3 flex-1">
-                <div className="flex justify-between">
-                  <p className="font-medium text-sm">{chat.name}</p>
-                  <span className="text-xs text-gray-400">{chat.last_message_time.slice(0,10)}</span>
-                </div>
-                <p className="text-xs text-gray-500 truncate">{chat.last_message}</p>
-              </div>
-
+                  <span className="ml-3 min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-3">
+                      <span className="truncate text-sm font-medium">{chatName}</span>
+                      <span className="shrink-0 text-xs text-gray-400">
+                        {formatMessageDate(chat?.last_message_time)}
+                      </span>
+                    </span>
+                    <span className="block truncate text-xs text-gray-500">
+                      {chat?.last_message || "No messages yet"}
+                    </span>
+                  </span>
+                </button>
+              );
+            })
+          ) : (
+            <div className="flex min-h-[320px] flex-col items-center justify-center px-4 text-center">
+              <div className="text-5xl">💬</div>
+              <p className="mt-3 font-semibold text-gray-700">No conversations yet</p>
+              <p className="mt-1 text-sm text-gray-500">
+                Start a conversation to see messages here
+              </p>
             </div>
-          ))}
-
+          )}
         </div>
       </div>
 
+      {hasSelectedChat ? (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex items-center justify-between border-b bg-white p-3 sm:p-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-200 font-semibold text-gray-600">
+                {displayInitials}
+              </div>
 
-      {/* RIGHT CHAT SECTION */}
-      { chatUsers && chatUsers.length > 0 && currentChat!==null ? (
-      <div className="flex-1 flex flex-col">
-
-        {/* TOP BAR */}
-        <div className="bg-white border-b p-4 flex justify-between items-center">
-
-          <div className="flex items-center gap-3">
-
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-semibold text-gray-600">
-              {displayInitials}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-black sm:text-base">
+                  {displayName}
+                </p>
+                <p className="text-xs text_lime">
+                  {connectionStatus === "connected" ? "● Online" : "Connecting..."}
+                </p>
+              </div>
             </div>
-
-            <div>
-              <p className="font-semibold text-black">{displayName}</p>
-              <p className="text-xs text_lime">● Verified Buyer</p>
-            </div>
-
           </div>
 
-         
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+            {messages.length > 0 ? (
+              messages.map((msg, index) => {
+                const isMe = String(msg?.sender_id) === String(currentUserId);
 
+                return (
+                  <div
+                    key={msg?.id || msg?.message_id || index}
+                    className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[78%] break-words rounded-2xl px-4 py-2 text-sm text-black sm:max-w-md ${
+                        isMe
+                          ? "rounded-br-none bg-green-200"
+                          : "rounded-bl-none bg-gray-200"
+                      }`}
+                    >
+                      {msg?.content}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center">
+                <div className="text-5xl">📩</div>
+                <p className="mt-3 font-semibold text-gray-700">No messages yet</p>
+                <p className="text-sm text-gray-500">Start the conversation below</p>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="flex items-center gap-2 border-t bg-white p-2 sm:gap-3 sm:p-3">
+            <button type="button" className="text-lg text-gray-500 sm:text-xl">
+              +
+            </button>
+
+            <input
+              placeholder="Type your message..."
+              className="flex-1 rounded-lg bg-gray-100 px-3 py-2 text-sm text-black outline-none sm:px-4"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              onKeyDown={handleInputKeyDown}
+            />
+
+            <div className="hidden items-center gap-2 sm:flex">
+              <Paperclip size={18} className="text-gray-500" />
+              <Smile size={18} className="text-gray-500" />
+              <Mic size={18} className="text-gray-500" />
+            </div>
+
+            <button
+              type="button"
+              className="rounded-lg bg-lime-500 p-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || connectionStatus !== "connected"}
+            >
+              <Send size={16} />
+            </button>
+          </div>
         </div>
-
-
-        {/* CHAT MESSAGES */}
-        <div className="flex-1  p-6 space-y-4 bg-gray-50 overflow-y-scroll">
-        {messages && messages.length > 0 && messages.map((msg,i)=>{
-
-          const isMe = msg.sender_id == userId ;
-  
-        return(
-      
-          <div
-      key={i}
-      className={`flex mb-2 ${!isMe ? "justify-end" : "justify-start"}`}
-    >
-      <div
-        className={`
-          px-4 py-2 rounded-2xl max-w-xs break-words
-          ${!isMe
-            ? "bg-green-200 text-black rounded-br-none" 
-            : "bg-gray-200 text-black rounded-bl-none"
-          }
-        `}
-      >
-        {msg.content}
-      </div>
-    </div>
-          
- ) }  )}
+      ) : (
+        <div className="hidden flex-1 items-center justify-center bg-white lg:flex">
+          <div className="text-center">
+            <div className="text-6xl">💬</div>
+            <p className="mt-4 text-lg font-semibold text-gray-700">
+              Select a chat to start messaging
+            </p>
+            <p className="text-sm text-gray-500">Your conversations will appear here</p>
+          </div>
         </div>
-
-
-        {/* MESSAGE INPUT */}
-        <div className="bg-white border-t p-3 flex items-center gap-3">
-
-          <button className="text-gray-500 text-xl">+</button>
-
-          <input
-            placeholder="Type your message..."
-            className="flex-1 bg-gray-100 px-4 py-2 rounded-lg outline-none text-black"
-            value={message}
-            onChange={(e)=>setMessage(e.target.value)}
-
-          />
-
-          <Paperclip size={18} className="text-gray-500"/>
-          <Smile size={18} className="text-gray-500"/>
-          <Mic size={18} className="text-gray-500"/>
-
-          <button className="bg-lime-500 p-2 rounded-lg text-white" onClick={handleMessage} onEnter={handleMessage}>
-            <Send size={18}/>
-          </button> 
-
-        </div>
-
-      </div>
-     )
-     :(<div className="bg-white"></div>) }
+      )}
     </div>
   );
 }

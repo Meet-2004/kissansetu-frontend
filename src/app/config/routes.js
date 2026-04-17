@@ -1,5 +1,5 @@
 export const routes = {
-  dashboard: { path: "/dashboard", title: "Dashboard" },
+  dashboard: { path: "/dashboard", title:"Dashboard" },
   profile: { path: "/profile", title: "Profile" },
   orders: { path: "/order-history", title: "Order History" },
   biddings: { path: "/my-biddings", title: "My Biddings" },
@@ -7,6 +7,7 @@ export const routes = {
   market: { path: "/market", title: "Market" },
   setting: { path: "/setting", title: "Setting" },
   Listings:{ path: "/my-listings", title: "My Listings" },
+  notifications:{path:"/notifications",title:"Notifications"},
 
 };
 

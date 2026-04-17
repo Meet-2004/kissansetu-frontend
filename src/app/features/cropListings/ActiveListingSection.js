@@ -3,58 +3,64 @@
 // import wheat from "@/public/wheat.jpg";
 // import rice from "@/public/rice.jpg";
 // import potato from "@/public/potato.jpg";
-"use client"
+"use client";
 import Plus from "@/SVG/Dashboard/Plus.svg";
-import Image from "next/image"
-import "@/app/globals.css"
+import Image from "next/image";
+import "@/app/globals.css";
 import AddCropModal from "../addCrop/AddCropModal";
-import {useState} from "react";
+import { useState } from "react";
 import CropViewModal from "../CropViewModal/cropViewModal";
 import ListingCard from "./ListingCard";
 import { headFont } from "@/app/layout";
 
-
-
 export default function ActiveListingsSection() {
+  const [openCropList, setOpenCropList] = useState(false);
+  const [refreshKey, setrefreshKey] = useState(0);
 
-     const [openCropList, setOpenCropList] = useState(false);
-     const[refreshKey,setrefreshKey]=useState(0);
+  console.log("this is refresh key ", refreshKey);
 
-   
-       
-
-
-   
   return (
-    <div className={`min-w-sm max-w-300  mx-auto ${openCropList ? "fixed ml-40" :""}`}>
-
+    <div
+      className={`md:min-w-sm md:max-w-300  max-w-md mx-auto  md:mx-auto ${openCropList ? "max-h-screen" : ""}`}
+    >
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 ">
-        <h2 className={`text-3xl text_black  ${headFont.className}`}>
+        <h2 className={`md:text-3xl text_black text-xl  ${headFont.className}`}>
           My Active Listings
         </h2>
 
-       <div className="float-right ">
-        <div>
-          {openCropList && <AddCropModal setOpenCropList={setOpenCropList} openCropList={openCropList} setrefreshKey={setrefreshKey} refreshKey={refreshKey} />}
-          <button className="hover:shadow-lg transition-shadow duration-300 " onClick={() =>setOpenCropList(true)}>
-            <div className="flex justify-center items-center Back_color gap-2  rounded-lg text-white mx-auto p-3 w-50   ">
-              <div>
-                <Image src={Plus} alt="Add new Listing" ></Image>
+        <div className="float-right ">
+          <div>
+            {openCropList && (
+              <AddCropModal
+                setOpenCropList={setOpenCropList}
+                openCropList={openCropList}
+                setrefreshKey={setrefreshKey}
+                refreshKey={refreshKey}
+              />
+            )}
+            <button
+              className="hover:shadow-lg transition-shadow duration-300 hover:cursor-pointer "
+              onClick={() => setOpenCropList(true)}
+            >
+              <div className="flex justify-center items-center Back_color md:gap-2  rounded-lg text-white mx-auto md:p-3 md:w-50    w-35 gap-1 p-2  ">
+                <div>
+                  <Image src={Plus} alt="Add new Listing"></Image>
+                </div>
+                <div>
+                  <p className="text-xs md:text-base">Add new Listing</p>
+                </div>
               </div>
-              <div>
-                <p>
-                  Add new Listing
-                </p>
-              </div>
-            </div>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
-     
-      </div>
       <div>
-        <ListingCard  refreshKey={refreshKey} setrefreshKey={()=>setrefreshKey(refreshKey + 1)} />
+        <ListingCard
+          setOpenCropList={() => setOpenCropList(true)}
+          refreshKey={refreshKey}
+          setrefreshKey={() => setrefreshKey(refreshKey + 1)}
+        />
       </div>
 
       {/* CARDS */}

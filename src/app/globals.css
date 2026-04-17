@@ -58,3 +58,151 @@ body {
 .back_lime{
   background-color: #64B900;
 }
+
+/* login button animation */
+
+.loader {
+  width: 1.2cm;
+  height: 1.2cm;
+  border: 3px solid yellowgreen;
+  background-color: yellowgreen;
+  /* border-top: 3px solid transparent;
+   border-bott: 3px solid transparent; */
+  border-radius: 6px;
+  animation: spinDiamond 1s linear infinite;
+}
+
+
+@keyframes spinDiamond {
+  0% {
+    transform: rotate(45deg);
+  }
+  100% {
+    transform: rotate(405deg);
+  }
+}
+
+
+/* ===== BUTTON BASE ===== */
+.btn-pro {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ===== TEXT ===== */
+.btn-text {
+  transition: all 0.3s ease;
+}
+
+.btn-loading .btn-text {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+/* ===== MORPH EFFECT ===== */
+.btn-loading {
+  width: 52px !important;
+  border-radius: 16px !important;
+}
+
+/* ===== LOADER SHAPE ===== */
+.loader-box {
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  background: white;
+  opacity: 0.9;
+
+  animation: morphRotate 1.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* ===== DRIBBBLE ROTATION ===== */
+@keyframes morphRotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(45deg) scale(0.9);
+  }
+  50% {
+    transform: rotate(90deg) scale(1);
+  }
+  75% {
+    transform: rotate(135deg) scale(0.9);
+  }
+  100% {
+    transform: rotate(180deg) scale(1);
+  }
+}
+
+/* ===== SUCCESS ===== */
+.success {
+  animation: pop 0.5s ease forwards;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===== CLICK FEEL ===== */
+.btn-pro:active {
+  transform: scale(0.95);
+}
+
+
+
+/* skeleton card */
+
+/* shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    110deg,
+    #f0fdf4 8%,
+    #dcfce7 18%,
+    #f0fdf4 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* glass effect */
+.skeleton-glass {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* entry animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}

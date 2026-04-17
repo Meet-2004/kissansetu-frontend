@@ -12,8 +12,8 @@ export default function ConfirmBidModal({ open, onClose, onConfirm,cropName,tota
   const [bidSucessModal, setbidSucessModal] = useState(false);
   console.log(bidSucessModal);
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-white rounded-2xl w-[520px] p-8 shadow-xl">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/80 z-50 h-full">
+      <div className="bg-white rounded-2xl max-w-100 md:max-w-120 p-8 shadow-xl">
         {/* Title */}
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">
           Confirm Your Bid

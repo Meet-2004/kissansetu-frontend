@@ -5,6 +5,7 @@ import { headFont } from "@/app/layout";
 import { getApi } from "@/services/apiService";
 import { useEffect,useState } from "react";
 import Link from "next/link"
+import  ZeroRequirementsLayouts  from "../My Listings/ZeroRequirementsLayouts";
 
 
 export default function BuyerRequirementSection() {
@@ -15,11 +16,11 @@ useEffect(()=>{
 
   async function fetchRequirement(){
     const getRequirements= await getApi("/listings/seller/requirements");
-    console.log("this is requirements",getRequirements.data)
+    console.log("this is requirements",getRequirements?.data)
     // setBuyerRequirements(getRequirements.data);
 
-  const top3= getRequirements.data.slice(0,2) || [];
-  setBuyerRequirements(top3);
+  const top2= getRequirements?.data?.slice(0,2) || [];
+  setBuyerRequirements(top2);
 
 
   }
@@ -70,19 +71,22 @@ useEffect(()=>{
           2 Active
         </span>
       </div>
-   {  buyerRequirements && buyerRequirements.length >= 2 &&
+     {
+         buyerRequirements && buyerRequirements.length >= 2 &&
         <div>
             <Link href="/my-listings" className="float-right text_lime text-xl ">View All</Link>
             </div>
 }
-      
 
       {/* CARDS GRID */}
+       {buyerRequirements && buyerRequirements.length > 0 ? (
       <div className="grid grid-cols-2 gap-6 mt-5">
         {buyerRequirements && buyerRequirements.length > 0 && buyerRequirements.map((item, index) => (
           <RequirementCard key={index} item={item} />
         ))}
-      </div>
+      </div>):(<ZeroRequirementsLayouts />)
+
+}
     </div>
   );
 }

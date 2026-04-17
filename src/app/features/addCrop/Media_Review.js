@@ -3,17 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCropData, resetCrop } from "../../Store/slices/cropSlice";
 import { ToastContainer, toast } from "react-toastify";
-
-
-
 // import FormLayout from "../../Dashboard/addCrop/FormLayout";
 import Image from "next/image";
 ``;
-import axios from "axios";
-import { handleApi } from "@/lib/apiHndler";
 import { postMultipartApi } from "@/services/apiService";
 import Toast from "@/Components/Alert/Toast";
-
 
 export default function Media_Review({
   back,
@@ -21,8 +15,10 @@ export default function Media_Review({
   setpublishedClicked,
   publishedClicked,
   onClose,
-  
+  state,
+  setState,
 }) {
+  console.log("this is state at media review", state);
   console.log("this is published clicked", publishedClicked);
   const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
   const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png"];
@@ -56,6 +52,7 @@ export default function Media_Review({
   const [pdfPreview, setPdfPreview] = useState([]);
   const [activePdfPreviewUrl, setActivePdfPreviewUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors,setErrors]=useState({})
 
   useEffect(() => {
     return () => {
@@ -63,6 +60,8 @@ export default function Media_Review({
       previewPdfUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
+
+
 
   const syncImagesToRedux = (files) => {
     const serializableImages = files.map((file) => ({
@@ -161,6 +160,7 @@ export default function Media_Review({
   };
 
   const handleImage = (e) => {
+    setErrors((prev)=>({...prev,image:""}));
     const newFiles = Array.from(e.target.files || []);
     if (!newFiles.length) return;
 
@@ -205,6 +205,7 @@ export default function Media_Review({
   };
 
   const handlePdf = (e) => {
+    setErrors((prev)=>({...prev,pdf:""}));
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -236,11 +237,29 @@ export default function Media_Review({
   };
   console.log("crop data", cropData);
 
-
-
   const handleSubmit = async () => {
     if (isSubmitting) return;
+    // if (state !== "idle") return;
+    console.log("this is selected image file noted it ",selectedFilesRef.current);
+    if( selectedFilesRef.current.length <= 0 || selectedPdfRef.current.length <= 0 ){
+      console.log("hello i am inside okay  ")
 
+      if(selectedFilesRef.current.length <= 0 && selectedPdfRef.current.length <= 0){
+        console.log("condition first")
+         setErrors({image:"Please Upload at least one Image",pdf:"Please Upload Pdf"})
+     
+      }else if(selectedFilesRef.current.length <= 0){
+         console.log("condition second")
+         setErrors({image:"Please Upload at least one Image"})
+      }else{
+           console.log("condition third")
+        setErrors({pdf:"Please Upload Pdf"})
+      }
+       setState("idle");
+         setpublishedClicked(false);
+      return ;
+    }
+    console.log("this is errors",errors)
     setIsSubmitting(true);
     const formData = new FormData();
 
@@ -261,52 +280,60 @@ export default function Media_Review({
       // );
 
       // setpublishedClicked(false);
-      const result =await postMultipartApi("/listings", formData, {
+      setState("loading");
+      const result = await postMultipartApi("/listings", formData, {
         withcredentials: true,
       });
       console.log("API response:", result);
 
       if (result.success) {
         // alert("Listing Published Successfully!");
-       
+        setTimeout(() => {
+          setState("success");
+
+          setTimeout(() => setState("idle"), 2500);
+        }, 2500);
         console.log(result);
-          toast.success(result.message);
-          console.log("this is result message",result.message);
-            localStorage.removeItem("persist:crop");
-       
+        setIsSubmitting(false);
+        toast.success(result.message);
+        console.log("this is result message", result.message);
+        localStorage.removeItem("persist:crop");
         clearAllImages();
         clearAllPDF();
         closeModal?.();
-       setpublishedClicked(false);
-       setTimeout(() => {
-        dispatch(resetCrop());
+        setpublishedClicked(false);
+        setTimeout(() => {
+          dispatch(resetCrop());
           onClose?.();
-        } , 2000);
-
-      }
-      
-      else{
-         toast.error(result.message);
-
+        }, 4000);
+      } else {
+          setpublishedClicked(false);
+           setIsSubmitting(false);
+         setState("idle")
+        toast.error(result.message);
       }
     } catch (err) {
+        setpublishedClicked(false);
+         setIsSubmitting(false);
+      setState("idle")
       toast.error(err?.message || "Failed to publish listing");
+     
       // console.log("hello error")
       // console.log(err);
     } finally {
-     
+      //  setIsSubmitting(false);
+        setpublishedClicked(false);
     }
   };
-  
+
   useEffect(() => {
     if (!publishedClicked) return;
-
     handleSubmit();
-  }, [publishedClicked, ]);
+  }, [publishedClicked]);
 
   return (
     <>
-    <Toast times={3000}/>
+      <Toast times={3000} />
       <div className="mb-6 text-black">
         <p className="font-semibold mb-3">Product Images</p>
 
@@ -363,7 +390,11 @@ export default function Media_Review({
             onChange={handleImage}
             className="hidden"
           />
+         
         </label>
+         {
+            errors && errors.image && <div className="text-red-500 mt-2">{errors.image}</div>
+          }
 
         {/* ERROR */}
         {imageError && (
@@ -380,6 +411,7 @@ export default function Media_Review({
             Clear All Images
           </button>
         )}
+        
 
         {/* IMAGE PREVIEW */}
         <div className="flex gap-3 mt-4 flex-wrap">
@@ -506,6 +538,10 @@ export default function Media_Review({
         {/* ERROR */}
         {pdfError && <p className="mt-2 text-sm text-red-600">{pdfError}</p>}
 
+          {
+            errors && errors.pdf && <div className="text-red-500 mt-2">{errors.pdf}</div>
+          }
+
         {/* PREVIEW FILE LIST */}
         <div className="flex flex-wrap gap-3 mt-4">
           {pdfPreview.map((item, index) => (
@@ -602,8 +638,6 @@ export default function Media_Review({
           </div>
         </div>
       </div>
-
-   
 
       {/* <div className="flex justify-between px-8 py-6 border-t mt-5">
 

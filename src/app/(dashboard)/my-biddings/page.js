@@ -12,6 +12,9 @@ import { getApi } from "@/services/apiService";
 import "@/app/globals.css";
 import Image from "next/image";
 import RaiseBidModal from "@/app/features/Raise Bid (My Biddings)/RaiseBid";
+import EscrowPayment from "@/app/features/Escrow Payment/EscrowPayment";
+import { headFont } from "@/app/layout";
+import RejectBidModal from "@/app/features/RejectBid/RejectBid";
 
 
 const FILTERS = ["all", "pending", "accepted", "rejected", "outbid"];
@@ -20,6 +23,12 @@ export default function MyBiddings() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [bidsList, setBidsList] = useState();
   const [raiseBidModal, setraiseBidModal] = useState(false);
+  const [escrowModal, setEscrowModal] = useState(false);
+  const [selectedListData, setselectedListData] = useState();
+  const [rejectBidModal, setrejectBidModal] = useState(false);
+  const[rejectModalData,setRejectModalData]=useState();
+  const [confirmPaymentRefreshKey, setconfirmPaymentRefreshKey] = useState(0);
+  const[confirmRejected,setConfirmRejected]=useState(false);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -27,6 +36,7 @@ export default function MyBiddings() {
     value: 0,
   });
   const [raiseBidModalData, setraiseBidModalData] = useState();
+  console.log("bid reject modal",rejectBidModal);
 
   //  API CALL (Replace with your backend)
   useEffect(() => {
@@ -41,15 +51,17 @@ export default function MyBiddings() {
       setBidsList(fetchedList.data);
     }
     fetchBidsList();
-  }, [activeFilter]);
+  }, [activeFilter, confirmPaymentRefreshKey]);
   console.log(bidsList);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
       {/* TITLE */}
       <div>
-        <h1 className="text-2xl font-semibold  text-black">My Biddings</h1>
-        <p className="text-black">Track all your bids and their status</p>
+        <h1 className={`text-3xl  text-black ${headFont.className}`}>
+          My Biddings
+        </h1>
+        <p className="text-gray-600">Track all your bids and their status</p>
       </div>
 
       {/*  STATS  */}
@@ -69,17 +81,16 @@ export default function MyBiddings() {
           icon={<TrendingUp />}
           value={`₹${stats.value}`}
           label="Total Bid Value"
-          highlight
         />
       </div>
 
       {/*  FILTERS  */}
-      <div className="flex gap-3 mb-6 flex-wrap bg-white p-2 border-gray-200 rounded-2xl border">
-        {FILTERS.map((filter,index) => (
+      <div className="flex gap-3 mb-6 flex-wrap bg-white p-2 border-gray-200 rounded-2xl border ">
+        {FILTERS.map((filter, index) => (
           <button
             key={index}
             onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-xl text-sm capitalize ${
+            className={`px-4 py-2 rounded-xl text-sm capitalize cursor-pointer ${
               activeFilter === filter
                 ? "back_lime text-white"
                 : "bg-gray-200 text-gray-700"
@@ -94,18 +105,42 @@ export default function MyBiddings() {
       <div className="grid md:grid-cols-3 gap-6">
         {bidsList &&
           bidsList.length > 0 &&
-          bidsList.map((bid,index) => (
+          bidsList.map((bid, index) => (
             <BidCard
-             setraiseBidModalData={setraiseBidModalData}
+              setraiseBidModalData={setraiseBidModalData}
               setraiseBidModal={() => setraiseBidModal(true)}
               key={index}
               bid={bid}
+              setEscrowModal={setEscrowModal}
+              setselectedListData={setselectedListData}
+              setconfirmPaymentRefreshKey={setconfirmPaymentRefreshKey}
+              confirmPaymentRefreshKey={confirmPaymentRefreshKey}
+              setrejectBidModal={setrejectBidModal}
+              setRejectModalData={setRejectModalData}
+              rejectModalData={rejectModalData}
             />
           ))}
       </div>
       {raiseBidModal && (
-        <RaiseBidModal onClose={() => setraiseBidModal(false)} raiseBidModalData={raiseBidModalData} />
+        <RaiseBidModal
+          onClose={() => setraiseBidModal(false)}
+          raiseBidModalData={raiseBidModalData}
+        />
       )}
+      {escrowModal && (
+        <EscrowPayment
+          onClose={() => setEscrowModal(false)}
+          setEscrowModal={setEscrowModal}
+          confirmPaymentRefreshKey={() => setconfirmPaymentRefreshKey(confirmPaymentRefreshKey + 1)}
+          selectedListData={selectedListData}
+        />
+      )}
+
+      {rejectBidModal && (
+
+        <RejectBidModal rejectModalData={rejectModalData} onClose={()=>setrejectBidModal(false)} confirmPaymentRefreshKey={()=>setconfirmPaymentRefreshKey(confirmPaymentRefreshKey + 1)} /> 
+      )
+      }
     </div>
   );
 }
@@ -128,8 +163,20 @@ function StatCard({ icon, value, label, highlight }) {
 }
 
 /*  BID CARD  */
-function BidCard({ bid, setraiseBidModal, setraiseBidModalData }) {
+function BidCard({
+  bid,
+  setrejectBidModal,
+  setraiseBidModal,
+  setraiseBidModalData,
+  setEscrowModal,
+  setselectedListData,
+  confirmPaymentRefreshKey,
+  setconfirmPaymentRefreshKey,
+  setRejectModalData,
+  rejectModalData,
+}) {
   const imageUrl = (path) => `${process.env.NEXT_PUBLIC_API_URL}/${path}`;
+ 
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border hover:shadow-2xl ">
@@ -221,16 +268,35 @@ function BidCard({ bid, setraiseBidModal, setraiseBidModalData }) {
         </div>
 
         {/* ACTIONS */}
-        <div className="flex gap-2 mt-4">
-          {bid?.bidStatus === "accepted" && (
-            <>
-              <button className="flex-1 back_lime text-white py-2 rounded-lg">
+        <div className=" mt-4">
+          {bid?.bidStatus === "ACCEPTED" && (
+            <div className="w-full flex gap-3">
+              <button
+                className=" flex-1 back_lime text-white py-2 rounded-lg cursor-pointer hover:bg-lime-700"
+                onClick={() => {
+                  setselectedListData(bid);
+                  setEscrowModal(true);
+                }}
+              >
                 Pay Now
               </button>
-              <button className="flex-1 bg-red-500 text-white py-2 rounded-lg">
+              <button
+                className="flex-1  bg-red-500 text-white py-2 rounded-lg cursor-pointer hover:bg-red-600"
+                onClick={() => {
+                  setRejectModalData({
+                    orderId: bid.orderId,
+                    listingId: bid.listingId,
+                    cropName: bid.cropName,
+                    variety: bid.variety,
+                    amount: bid.bidAmount,
+                    listingId:bid?.listingId,
+                  });
+                  setrejectBidModal(true);
+                }}
+              >
                 Reject
               </button>
-            </>
+            </div>
           )}
 
           {bid?.bidStatus === "PENDING" &&
@@ -238,23 +304,22 @@ function BidCard({ bid, setraiseBidModal, setraiseBidModalData }) {
             <button
               className="w-full back_lime text-white py-2 rounded-lg"
               onClick={() => {
-                setraiseBidModalData(
-                  {
-                    cropName: bid?.cropName,
-                    variety: bid?.variety,
-                    currentHighestBid: bid?.currentHighestBid,
-                    yourBid: bid?.bidAmount,
-                    listingId:bid?.listingId,
-                    bidIncrement:bid?.minimumBidIncrement,
-                  },
-                );
+                setraiseBidModalData({
+                  cropName: bid?.cropName,
+                  variety: bid?.variety,
+                  currentHighestBid: bid?.currentHighestBid,
+                  yourBid: bid?.bidAmount,
+                  listingId: bid?.listingId,
+                  bidIncrement: bid?.minimumBidIncrement,
+                  
+                });
                 setraiseBidModal(true);
               }}
             >
               Raise Bid
             </button>
           ) : (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-2 items-center justify-center w-full  ">
+            <div className="bg-green-50 border mt-2 border-green-200 rounded-lg p-2 items-center justify-center w-full  ">
               <div className=" text-green-700  w-fit">
                 <div className="text-center flex items-center justify-center w-fit">
                   <p className="text-center text-xs flex justify-center items-center">

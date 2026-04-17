@@ -5,7 +5,7 @@ import { setCropData } from "../../Store/slices/cropSlice";
 
 
 
-export default function PurchaseType(){
+export default function PurchaseType({errors={}}){
 
       const crop = useSelector((state) => state.crop.data.pricing);
       const dispatch =useDispatch();
@@ -13,7 +13,9 @@ export default function PurchaseType(){
      const [purchaseType, setpurchaseType] = useState("WHOLE_LOT_ONLY");
 
      const handleChange=(e)=>{
-        
+     
+      const val =e.target.value;
+        if(val==="" || /^\d+$/.test(val))
          dispatch(setCropData({ [e.target.name]: e.target.value }));
      }
      const handlePurchaseType=(purchaseType)=>{
@@ -41,6 +43,7 @@ export default function PurchaseType(){
               />
               Whole Lot Only
             </label>
+              
             <p className="text-gray-600 text-sm ml-5 mt-2 ">Buyers must purchase the entire quantity you're listing. This is ideal when you want to sell all your produce in a single transaction. Example: If you list 1000 kg, the buyer must buy all 1000 kg.</p>
             </div>
                 <div className={`w-full border-2 border-gray-300 px-5 py-2 rounded-xl ${purchaseType==="PARTIAL_ORDER_ALLOWS"?"bg-lime-50 border-lime-500 border-2":""}`} >
@@ -53,6 +56,9 @@ export default function PurchaseType(){
               />
               Partial Orders Allowed
             </label>
+             {errors.purchaseType && (
+                  <p className="mt-1 text-sm text-red-600">{errors.purchaseType}</p>
+                )}
             <p className="text-gray-600 text-sm ml-5 mt-2 ">Buyers can purchase any quantity they need, as long as it meets your minimum order quantity (MOQ). This allows multiple buyers to purchase from your listing. Example: If you list 1000 kg with MOQ of 100 kg, buyers can order 100 kg, 250 kg, 500 kg, etc.</p>
           {/* MOQ */}
            {purchaseType === "PARTIAL_ORDER_ALLOWS" && (
@@ -73,6 +79,9 @@ export default function PurchaseType(){
                   value={crop.minimumOrderQuantity}
                   onChange={handleChange}
                 />
+                 {errors.minimumOrderQuantity && (
+                  <p className="mt-1 text-sm text-red-600">{errors.minimumOrderQuantity}</p>
+                )}
               </div>
 
               <div className="flex flex-col">
@@ -88,16 +97,16 @@ export default function PurchaseType(){
                   value={crop.moqPricePerKg}
                   onChange={handleChange}
                 />
+                 {errors.moqPricePerKg && (
+                  <p className="mt-1 text-sm text-red-600">{errors.moqPricePerKg}</p>
+                )}
+                
               </div>
-
             </div>
             </>
           )}
             </div>
-
           </div> 
-
-
             </div>
         </section>
     )

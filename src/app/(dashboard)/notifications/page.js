@@ -22,7 +22,7 @@ export default function NotificationsPage() {
      const [escrowModal,setEscrowModal]=useState(false);
   const [selectedListData,setselectedListData]=useState();
 
-     const [notificationRefreshKey,setnotificationRefreshKey]=useState(0);
+     const [notificationRefreshKey,confirmPaymentRefreshKey]=useState(0);
    
   
      useEffect(()=>{
@@ -44,7 +44,7 @@ export default function NotificationsPage() {
       console.log(orderId,listingId)
     const rejectApi =await postApi(`orders/${listingId}/reject`);
      if(rejectApi.success){
-      setnotificationRefreshKey(refreshKey+1);
+      confirmPaymentRefreshKey(refreshKey+1);
      }
   
     }
@@ -188,7 +188,7 @@ export default function NotificationsPage() {
       )))}
     </div>
      {
-              escrowModal && <EscrowPayment setEscrowModal={setEscrowModal} setnotificationRefreshKey={()=>setnotificationRefreshKey(notificationRefreshKey+1)} selectedListData={selectedListData} onClose={()=>setEscrowModal(false)} />
+              escrowModal && <EscrowPayment setEscrowModal={setEscrowModal} confirmPaymentRefreshKey={()=>confirmPaymentRefreshKey(notificationRefreshKey+1)} selectedListData={selectedListData} onClose={()=>setEscrowModal(false)} />
             }
             </>
   );

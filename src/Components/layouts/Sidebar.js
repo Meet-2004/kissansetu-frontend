@@ -1,8 +1,5 @@
 "use client";
 import toogle from "@/SVG/Dashboard/toogle.svg";
-import leftLeaf from "@/SVG/Dashboard/Leaf_left.svg";
-import rightLeaf from "@/SVG/Dashboard/Leaf_Right.svg";
-import Dashboards from "@/SVG/Dashboard/Dashboards.svg";
 import Setting from "@/SVG/Dashboard/Setting.svg";
 import My_Listing from "@/SVG/Dashboard/My_Listing.svg";
 import Messages from "@/SVG/Dashboard/Messages.svg";
@@ -12,15 +9,13 @@ import Mybiddings from "@/SVG/Dashboard/Mybiddings.svg";
 import Orderhistory from "@/SVG/Dashboard/Orderhistory.svg";
 import { useState } from "react";
 import Image from "next/image";
-import Router from "next/router";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import "@/app/globals.css";
-import { TbHammer } from "react-icons/tb";
 import { GrHistory } from "react-icons/gr";
 import routes from "@/app/config/routes";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import Logo from "@/SVG/Dashboard/KisanSetuLogo.svg"
 // import { TbHammer } from "react-icons/tb";
 
 export default function Sidebar({ settoogleButton, toogleButton }) {
@@ -36,6 +31,12 @@ export default function Sidebar({ settoogleButton, toogleButton }) {
       setactive("");
     }
   }, [pathName]);
+
+  useEffect(()=>{
+
+      settoogleButton(false);
+    
+  },[pathName])
 
  
   const halfList = [
@@ -106,7 +107,7 @@ export default function Sidebar({ settoogleButton, toogleButton }) {
     {
       id: 5,
       src: Setting,
-      name: "Setting",
+      name: "Settings",
       path: "/setting",
     },
   ];
@@ -121,7 +122,7 @@ export default function Sidebar({ settoogleButton, toogleButton }) {
       {/* MOBILE OVERLAY */}
       {toogleButton && (
         <div
-          className="fixed inset-0 bg-black/30 bg-opacity-50  md:hidden"
+          className="fixed inset-0 z-50 bg-black/30 bg-opacity-50  md:hidden"
           onClick={() => settoogleButton(false)}
         />
       )}
@@ -135,30 +136,31 @@ export default function Sidebar({ settoogleButton, toogleButton }) {
         bg-white
         border-r
         transition-all duration-300
-        
-
+        z-50 
+        md:z-0
         ${toogleButton ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0
         ${toogleButton ? "w-64" : "w-20"}
       `}
       >
         {/* HEADER */}
-        <div className="h-16 border-b flex items-center justify-between px-4">
+        <div className={`h-16 border-b flex items-center  ${toogleButton ? "justify-between":"justify-center"} px-4`}>
           {/* LOGO */}
           {toogleButton && (
             <div className="flex items-center gap-1">
-              <Image src={leftLeaf} alt="left leaf" />
+              {/* <Image src={leftLeaf} alt="left leaf" />
               <Image src={rightLeaf} alt="right leaf" />
-              <span className="font-semibold text-black">KissanSetu</span>
+              <span className="font-semibold text-black">KissanSetu</span> */}
+              <Image src={Logo} alt="KisanSetu" className="ml-1" />
             </div>
           )}
 
           {/* TOGGLE BUTTON */}
           <button
             onClick={() => settoogleButton(!toogleButton)}
-            className="hover:bg-gray-100 p-2 rounded-lg"
+            className="hover:bg-gray-100 p-2 rounded-lg justify-center items-center flex"
           >
-            <Image src={toogle} alt="toggle button" width={20} height={20} />
+            <Image src={toogle} alt="toggle button" width={20} height={20} className=" justify-center items-center flex"  />
           </button>
         </div>
 
@@ -168,7 +170,7 @@ export default function Sidebar({ settoogleButton, toogleButton }) {
             <Link
               key={item.id}
               href={item.path}
-              // onClick={() => setactive(item.name)}
+              // onClick={() => settoogleButton(false)}
               className={`flex items-center  gap-3 px-3 py-3 rounded-lg hover:bg-gray-200 transition
             ${active === item.name ? "bg-lime-500 text-white" : ""} ${!toogleButton && "justify-center"}`}
             >

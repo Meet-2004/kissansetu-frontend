@@ -14,8 +14,8 @@ export default function RequirementModal({
       <div className="
         bg-white 
         w-full
-        md:min-w-[180vh]
-        max-w-[200vh]
+        md:min-w-[110vh]
+        max-w-[110vh]
         sm:w-[90%] 
         lg:w-[70%] 
         xl:w-[60%] 

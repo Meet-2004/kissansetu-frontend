@@ -1,12 +1,29 @@
+"use client"
 import { headFont } from "@/app/layout";
 import Icon from "@/assets/Icon.svg";
 import Image from "next/image";
 import svg from "../../../public/Scheme_svg.svg";
 import Link from "next/link";
+import { getApi } from "@/services/apiService";
+import { useEffect,useState } from "react";
 
 export default async function Schemes() {
-  const scheme = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/schemes`);
-  const schemeData = await scheme.json();
+
+  const [schemeData,setschemeData]=useState();
+
+
+  useEffect(()=>{
+    async function fetchSchemes(){
+      try{
+        const schemes=await getApi("/schemes");
+        setschemeData(schemes);
+      }
+      catch{
+        console.log("Error fetching schemes data")
+      }
+    }
+    fetchSchemes();
+  },[])
 
   console.log(schemeData);
 
